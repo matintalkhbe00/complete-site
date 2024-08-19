@@ -395,7 +395,11 @@
         <div>
             <h1>{{ user.fullname }}</h1>
             <p>شماره تلفن: {{ user.phone }}</p>
-            <p>ایمیل: {{ user.email }}</p>
+            {% if user.email %}
+
+        <p>ایمیل: {{ user.email }}</p>
+    {% endif %}
+
             <p>وضعیت:
                 {% if user.is_active %}
                     فعال
@@ -422,6 +426,7 @@
             {% endif %}
 
             <!-- فرم خروج -->
+            <a href="{% url 'account_app:edit_profile' %}">ویرایش اطلاعات</a>
             <form method="POST" action="{% url 'account_app:logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="text-gray-500 hover:underline">خروج</button>
@@ -434,7 +439,11 @@
         <h2>اطلاعات کلی</h2>
         <p>نام کامل: {{ user.fullname }}</p>
         <p>شماره تلفن: {{ user.phone }}</p>
+    {% if user.email %}
+
         <p>ایمیل: {{ user.email }}</p>
+    {% endif %}
+
         <p>وضعیت:
             {% if user.is_active %}
                 فعال

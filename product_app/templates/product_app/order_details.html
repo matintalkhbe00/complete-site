@@ -601,7 +601,7 @@
 
                                             </p>
                                                 {% if item.product.discount_percentage %}
-                                                    <span class="text-teal-400 text-lg">
+                                                    <span class="text-teal-400" style="font-size: 15px">
                     <span class="price">{{ item.product.price|floatformat:0|intcomma }}</span> تومان
                     {{ item.product.discount_percentage }}% تخفیف
                                                                             => {{ item.product.get_final_price }} تومان

@@ -18,7 +18,8 @@ urlpatterns = [
 
     path('upload_profile_picture/', views.upload_profile_picture, name='upload_profile_picture'),
     path('delete_profile_picture/', views.delete_profile_picture, name='delete_profile_picture'),
-
+    path('edit_profile/', views.EditProfileView.as_view(), name='edit_profile'),
+    path('password_change/', views.PasswordChangeViewCustom.as_view(), name='password_change'),
     # //////////////////////////////////////////////////////
     path('contact/', views.ContactUsView.as_view(), name='contact_form_submit'),
 ]

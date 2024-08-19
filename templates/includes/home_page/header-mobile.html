@@ -1,0 +1,237 @@
+{% load static %}
+{% load humanize %}
+
+<!-- Header Of Mobile sm & md  -->
+<div class="flex justify-between items-center md:hidden bg-white dark:bg-zinc-700 h-16 px-4">
+    <!-- Menu Icon  -->
+    <div class="nav-icon">
+        <svg class="w-6 h-6 text-zinc-700 dark:text-white">
+            <use href="#bars-3"></use>
+        </svg>
+    </div>
+    <!-- Menu  -->
+    <div
+            class="nav fixed min-h-screen top-0 bottom-0 -right-64 w-64 pt-3 px-4 bg-white dark:bg-zinc-700 z-20 transition-all overflow-y-auto">
+        <!-- Header Of Menu  -->
+        <div class="flex justify-between items-center pb-5 border-b border-b-gray-100 dark:border-b-white/10">
+            <div class="flex gap-3.5">
+                <svg class="h-10 w-[41px] text-orange-300">
+                    <use href="#logo"></use>
+                </svg>
+                <svg class="h-10 w-[100px] text-orange-300">
+                    <use href="#logo-type"></use>
+                </svg>
+            </div>
+
+            <div class="nav-close-btn">
+                <svg class="h-5 w-5 text-zinc-600 dark:text-white">
+                    <use href="#x-mark"></use>
+                </svg>
+            </div>
+        </div>
+        <!-- Body Of Menu  -->
+
+        <div>
+            <ul class="child:pr-2.5 space-y-6 text-zinc-600 dark:text-white">
+                <li class="mt-6 flex gap-2">
+                    <svg class="w-5 h-5">
+                        <use xlink:href="#home"></use>
+                    </svg>
+                    <a href="{% url 'home_app:home' %}">صفحه اصلی</a>
+                </li>
+                <!-- Sidebar Menu  -->
+                <li>
+                    <div class="flex items-center justify-between mb-3">
+                        <a href="{% url 'product_app:product_list' %}" class="flex gap-2">
+                            <svg class="w-5 h-5">
+                                <use xlink:href="#shopping-bag"></use>
+                            </svg>
+                            <span>فروشگاه</span>
+                        </a>
+                        <span class="submenu-open-btn">
+{#                                <svg class="w-5 h-5 ml-2">#}
+{#                                    <use xlink:href="#chevron-down-mini"></use>#}
+{#                                </svg>#}
+                            </span>
+                    </div>
+                </li>
+
+                <li class="flex gap-2">
+                    <svg class="w-5 h-5">
+                        <use xlink:href="#briefcase"></use>
+                    </svg>
+                    <a href="{% url 'home_app:about-us' %}">درباره ما</a>
+                </li>
+                <li class="flex gap-2">
+                    <svg class="w-5 h-5">
+                        <use xlink:href="#document-text"></use>
+                    </svg>
+                    <a href="#">بلاگ</a>
+                </li>
+                <li class="flex gap-2">
+                    <svg class="w-5 h-5">
+                        <use xlink:href="#phone-arrow"></use>
+                    </svg>
+                    <a href="{% url 'account_app:contact_form_submit' %}">تماس با ما</a>
+                </li>
+            </ul>
+        </div>
+        <!-- Footer Of Menu  -->
+        <div
+                class="border-t flex flex-col gap-y-6 items-start border-t-gray-100 dark:border-t-white/10 text-orange-300 py-8 px-2.5 mt-8">
+            <div class="flex gap-x-2">
+                <svg class="h-5 w-5">
+                    <use href="#arrow-left-end-on-rectangle"></use>
+                </svg>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'account_app:profile' %}">پروفایل</a>
+                {% else %}
+                    <a href="{% url 'account_app:login' %}">ورود | ثبت‌نام</a>
+                {% endif %}
+            </div>
+            <div class="toggle-theme">
+                <!-- Ligth Mode  -->
+                <div class="flex items-center gap-x-2 dark:hidden">
+                    <svg class="h-5 w-5">
+                        <use href="#moon"></use>
+                        <span>تم تیره</span>
+                    </svg>
+                </div>
+                <!-- Dark Mode  -->
+                <div class="hidden dark:flex items-center gap-x-2">
+                    <svg class="h-5 w-5">
+                        <use href="#sun"></use>
+                        <span>تم روشن</span>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex gap-x-2">
+                <svg class="h-5 w-5">
+                    <use href="#shopping-cart"></use>
+                </svg>
+                <a href="{% url 'product_app:order_detail' %}">سبد خرید</a>
+            </div>
+        </div>
+    </div>
+    <!-- Logo Type  -->
+    <div>
+        <svg class="h-10 w-[100px] text-orange-300">
+            <use href="#logo-type"></use>
+        </svg>
+    </div>
+
+    <!-- Cart Icon  -->
+    <div class="cartIcon">
+        <svg class="text-zinc-700 w-6 h-6 dark:text-white">
+            <use href="#shopping-cart"></use>
+        </svg>
+    </div>
+    <!-- Cart sidebar  -->
+    <div
+            class="cartSidebar flex flex-col fixed top-0 bottom-0 -left-64 w-64 pt-4 px-4 bg-white dark:bg-zinc-700 z-20 transition-all ">
+        <!-- Header Of Menu  -->
+        <div class=" items-center pb-4 border-b border-b-gray-300 dark:border-b-white/10">
+
+
+            <div class="flex justify-between text-zinc-600 dark:text-white">
+                <div class="cart-close-btn">
+                    <svg class="h-5 w-5">
+                        <use href="#x-mark"></use>
+                    </svg>
+                </div>
+                سبد خرید
+            </div>
+        </div>
+        <!-- Body Of Menu  -->
+        <div class=" child:border-b child:border-gray-100 child:dark:border-white/10">
+            {% if order %}
+                {% for item in order.items.all %}
+                    {% if item.product.status == 'in_stock' %}
+                        <div class="flex gap-x-2.5 mt-5 pb-5">
+                            <!-- Img product -->
+                            <div class="w-[90px] h-[90px] shrink-0 ">
+                                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}">
+                            </div>
+                            <div class="flex flex-col justify-between gap-y-1.5">
+                                <a href="{% url 'product_app:product_detail' item.product.id %}">
+                                    <h4 class="font-DanaMedium text-zinc-700 dark:text-white text-sm line-clamp-2">
+                                        {{ item.product.name }}
+                                    </h4>
+                                </a>
+                                <div>
+                                    {% if item.product.status == 'in_stock' %}
+                                        {% if item.product.discount_percentage %}
+                                            <span class="text-teal-600 dark:text-emerald-500 text-xs tracking-tighter">{{ item.get_discounted_price|intcomma }}</span>
+                                            <span class="text-teal-600 dark:text-emerald-500 text-xs tracking-tighter">تومان تخفیف</span>
+                                            
+                                            <div class="text-zinc-700 dark:text-white">
+                                                <span class="text-base">{{ item.product.get_final_price|intcomma }}</span>
+                                                <span class="text-sm">تومان</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="text-zinc-700 dark:text-white">
+                                                <span class="text-base">{{ item.product.price }}</span>
+                                                <span class="text-sm">تومان</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+
+
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-zinc-700 dark:text-white">
+                            <span class="text-base">محصول موجود نیست</span>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <p><strong>محصولی برای نمایش وجود ندارد</strong></p>
+                {% endfor %}
+            {% else %}
+                
+                <p><strong>شما هنوز سفارشی ندارید!</strong></p>
+            {% endif %}
+            {#            <div class="flex gap-x-2.5 mt-5 pb-5">#}
+            {#                <!-- Img product -->#}
+            {#                <div class="w-[90px] h-[90px] shrink-0 ">#}
+            {#                    <img src="{% static 'img/products/p1.png' %}" alt="product 1">#}
+            {#                </div>#}
+            {#                <div class="flex flex-col justify-between gap-y-1.5">#}
+            {#                    <a href="#">#}
+            {#                        <h4 class="font-DanaMedium text-zinc-700 dark:text-white text-sm line-clamp-2">#}
+            {#                            قهوه اسپرسو بن مانو مدل پریسکا 250 گرمی#}
+            {#                        </h4>#}
+            {#                    </a>#}
+            {#                    <div>#}
+            {#                            <span class="text-teal-600 dark:text-emerald-500 text-xs tracking-tighter">14.500#}
+            {#                                تومان تخفیف</span>#}
+            {#                        <div class="text-zinc-700 dark:text-white">#}
+            {#                            <span class="text-base">175,000 </span>#}
+            {#                            <span class="text-sm">تومان</span>#}
+            {#                        </div>#}
+            {#                    </div>#}
+            {#                </div>#}
+            {#            </div>#}
+
+        </div>
+
+        <!-- Footer Of Cart  -->
+        {% if order %}
+        	<div class="flex justify-between items-center mt-auto mb-8">
+            <div>
+                <a href="{% url 'product_app:order_detail' %}"
+                   class="bg-teal-600 text-white text-base rounded-2xl px-4 py-2">ثبت سفارش</a>
+            </div>
+            <div class="flex flex-col">
+                <div class="text-gray-300 tracking-tighter text-xs">مبلغ قابل پرداخت</div>
+                <div class="text-zinc-700 dark:text-white">
+                    <span class="text-xl">{{ order.total_price|intcomma }}</span>
+                    <span class="text-sm">تومان</span>
+                </div>
+            </div>
+        </div>
+        {% endif %} 
+    </div>
+    <!-- End Cart sidebar  -->
+</div>

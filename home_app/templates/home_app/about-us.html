@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block style %}
+    <style>
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .about-header {
+            margin-bottom: 40px;
+        }
+
+        .about-description {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .image-grid img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .image-grid img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <main class="text-black font-DanaRegular md:py-[150px]">
+        <div class="about-container bg-white shadow-lg rounded-lg p-6">
+            <h1 class="text-3xl font-bold about-header">درباره ما</h1>
+            <p class="about-description">
+                شرکت ما در زمینه تولید و عرضه بهترین قهوه‌های دنیا فعالیت می‌کند. ما با بهره‌گیری از تخصص و تجربه خود،
+                تلاش می‌کنیم تا طعمی بی‌نظیر و تجربه‌ای لذت‌بخش از نوشیدن قهوه را به مشتریان خود ارائه دهیم.
+                تمامی محصولات ما با دقت و عشق به هنر تهیه می‌شوند و هر فنجان قهوه‌ای که از ما می‌نوشید،
+                نشان‌دهنده کیفیت و تعهد ما به بهترین بودن است.
+            </p>
+            <div class="image-grid">
+            
+                {% if img_company %}
+                    {% for img in img_company %}
+
+                        <img src="{{ img.image.url }}" alt="Our Coffee Company" class="about-image">
+                    {% endfor %}
+
+{#                        <img src="{{ img_company.first.image.url }}" alt="Our Coffee Company" class="about-image">#}
+
+
+                {% endif %}
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block script %}
+    <!-- اسکریپت‌های اضافی در صورت نیاز -->
+{% endblock %}

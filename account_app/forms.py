@@ -2,7 +2,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
+
 from .models import User, ContactUs
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 class CustomLoginForm(AuthenticationForm):
@@ -18,7 +21,6 @@ class CustomLoginForm(AuthenticationForm):
             'class': 'block w-full p-2 border border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-white placeholder-gray-400',
         })
     )
-
 
 
 class UserCreationForm(forms.ModelForm):
@@ -102,3 +104,35 @@ class ContactForm(forms.ModelForm):
                 'rows': 5,
             }),
         }
+
+
+class PasswordChangeCustomForm(PasswordChangeForm):
+    old_password = forms.CharField(label='رمز عبور قبلی', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    new_password1 = forms.CharField(label='رمز عبور جدید', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    new_password2 = forms.CharField(label='تکرار رمز عبور جدید', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+
+class ProfileEditForm(forms.ModelForm):
+    email = forms.EmailField(
+        validators=[EmailValidator()],
+        error_messages={
+            'invalid': 'ایمیل وارد شده معتبر نمی‌باشد.',
+            'unique': 'این ایمیل قبلاً ثبت شده است.'
+        }
+    )
+
+    class Meta:
+        model = User
+        fields = ['fullname', 'phone', 'email']
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if User.objects.exclude(pk=self.instance.pk).filter(phone=phone).exists():
+            raise ValidationError('این شماره تلفن قبلاً ثبت شده است.')
+        return phone
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
+            raise ValidationError('این ایمیل قبلاً ثبت شده است.')
+        return email

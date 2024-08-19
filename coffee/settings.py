@@ -26,6 +26,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# ALLOWED_HOSTS = ["main-model.chbk.run"]
+# CSRF_TRUSTED_ORIGINS = ['https://main-model.chbk.run']
+
 # Application definition
 
 INSTALLED_APPS = [

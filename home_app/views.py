@@ -81,3 +81,7 @@ class GuaranteeView(TemplateView):
         })
 
         return context
+
+
+class AboutUsView(TemplateView):
+    template_name = 'home_app/about-us.html'

@@ -20,12 +20,17 @@ class PhoneCompany(models.Model):
     def __str__(self):
         return self.phone
 
+class ImageCompany(models.Model):
+    image = models.ImageField(upload_to="images/company/")
+
+
 class Footer(models.Model):
     name = models.CharField(verbose_name='اسم شرکت',null=True , blank=True , max_length=100)
     description = models.TextField(verbose_name='توضیحات فوتر')
     address = models.TextField(verbose_name='آدرس شرکت')
     email = models.EmailField(verbose_name='ایمیل شرکت')
     phone = models.ManyToManyField(PhoneCompany, verbose_name='شماره‌های تلفن شرکت')
+    img = models.ManyToManyField(ImageCompany,verbose_name='عکس های شرکت')
     instagram = models.URLField(verbose_name='آدرس اینستاگرام شرکت', null=True, blank=True)
     id_instagram = models.CharField(max_length=50, verbose_name='آیدی اینستاگرام شرکت', null=True, blank=True)
 
@@ -37,6 +42,8 @@ class Footer(models.Model):
 
     twitter = models.URLField(verbose_name='آدرس توییتر شرکت', null=True, blank=True)
     id_twitter = models.CharField(max_length=50, verbose_name='آیدی توییتر شرکت', null=True, blank=True)
+
+
 
     def __str__(self):
         return self.email

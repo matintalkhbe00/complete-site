@@ -2,6 +2,7 @@ import os
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -13,10 +14,10 @@ from product_app.models import Order, User
 from .forms import CustomLoginForm, UserCreationForm, ContactForm
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
-
+from .forms import ProfileEditForm, PasswordChangeCustomForm
 from .models import Address, ContactUs
 
 
@@ -136,6 +137,72 @@ class ProfileView(LoginRequiredMixin,TemplateView):
             return redirect('account_app:login')  # فرض کنید نام URL صفحه ثبت‌نام 'signup' است
         return super().get(request, *args, **kwargs)
 
+# /////////////////////////////////////////////
+
+class ProfileEditView(UpdateView):
+    model = User
+    form_class = ProfileEditForm
+    template_name = 'account_app/edit_profile.html'
+    success_url = reverse_lazy('account_app:profile_edit')
+
+    def get_object(self):
+        return self.request.user
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'پروفایل با موفقیت به‌روز شد.')
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'برخی از فیلدها اشتباه است.')
+        return self.render_to_response(self.get_context_data(form=form))
+
+class PasswordChangeViewCustom(PasswordChangeView):
+    form_class = PasswordChangeCustomForm
+    template_name = 'account_app/edit_profile.html'
+    success_url = reverse_lazy('account_app:profile_edit')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        update_session_auth_hash(self.request, form.user)
+        messages.success(self.request, 'رمز عبور با موفقیت تغییر کرد.')
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'خطایی در تغییر رمز عبور وجود دارد.')
+        return self.render_to_response(self.get_context_data(form=form))
+
+class EditProfileView(TemplateView):
+    template_name = 'account_app/edit_profile.html'
+    success_url = reverse_lazy('account_app:edit_profile')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['profile_form'] = ProfileEditForm(instance=self.request.user)
+        context['password_form'] = PasswordChangeCustomForm(user=self.request.user)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        profile_form = ProfileEditForm(request.POST, instance=request.user)
+        password_form = PasswordChangeCustomForm(user=request.user, data=request.POST)
+        print('change')
+        if profile_form.is_valid() and password_form.is_valid():
+            print('pass user')
+            profile_form.save()
+            user = password_form.save()
+            update_session_auth_hash(request, user)  # مهم برای عدم خروج کاربر پس از تغییر رمز
+            return redirect('account_app:profile')
+
+        elif profile_form.is_valid():
+            print('user')
+            profile_form.save()
+            return redirect('account_app:profile')
+        elif password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)  # مهم برای عدم خروج کاربر پس از تغییر رمز
+            return redirect('account_app:profile')
+
+        return self.render_to_response(self.get_context_data(profile_form=profile_form, password_form=password_form))
 
 # ///////////////////////////////////////////
 

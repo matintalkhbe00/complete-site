@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load humanize %}
 {% block style %}
     <style>
@@ -362,7 +363,7 @@
             }
         }
     </style>
-        <style>
+    <style>
         .faq-question {
             cursor: pointer;
             transition: background-color 0.3s ease;
@@ -388,28 +389,156 @@
             transform: rotate(180deg);
         }
     </style>
+    <style>
+        .order-items {
+            padding: 20px;
+        }
+
+        .order-items-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .order-item {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .order-item-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .order-item-details {
+            margin-top: 10px;
+        }
+
+        .delete-form {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .delete-button {
+            background-color: #e3342f;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+
+            cursor: pointer;
+        }
+
+        .quantity-input {
+            background-color: #1f2937;
+            color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            text-align: center;
+            width: 60px;
+        }
+
+        @media (min-width: 768px) {
+            .order-item {
+                flex-direction: row;
+            }
+
+            .order-item-image {
+                max-width: 150px;
+                margin-right: 20px;
+            }
+
+            .order-item-details {
+                flex: 1;
+            }
+
+            .delete-button {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+    <style>
+        .order-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .order-header h1 {
+            margin-bottom: 20px;
+        }
+
+        .order-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+
+        /* استایل‌های responsive */
+        @media (max-width: 640px) {
+            .order-header {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px; /* Padding for smaller screens */
+            }
+
+            .order-buttons {
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 20px; /* Space between buttons */
+            }
+
+            .order-actions {
+                position: static; /* Reset position for small screens */
+                margin-top: 20px;
+            }
+        }
+
+        @media (min-width: 640px) {
+            .order-actions {
+                position: absolute;
+                left: 20px; /* Adjust as needed */
+                bottom: 20px; /* Fixed at the bottom */
+            }}
+
+    </style>
+
+
+    {#    <link rel="stylesheet" href="{% static 'style/order-details.css' %}">#}
+
 {% endblock %}
 
 {% block main %}
     <main class="py-[150px] font-DanaRegular container">
         <div class="order-container">
             <div class="order-header">
-                <h1>جزئیات سفارشات</h1>
-                <nav>
-                    <a href="{% url 'product_app:product_list' %}">بازگشت به لیست محصولات</a>
-                </nav>
-                {#            button confirm#}
-                {% if orders %}
-                    {% for order in orders %}
-                        {% if order.items.all %}
-                            <div class="order-actions">
-                                <a href="{% url 'product_app:order_confirm' %}" class="btn-confirm">تایید سفارش</a>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-
-                {% endif %}
-
+                <h1> جزئیات سفارشات</h1>
+                <div class="order-buttons">
+                    <nav>
+                        <a href="{% url 'product_app:product_list' %}" class="btn btn-back"> بازگشت به لیست محصولات</a>
+                    </nav>
+                    {% if orders %}
+                        {% for order in orders %}
+                            {% if order.items.all %}
+                                <div class="order-actions">
+                                    <a href="{% url 'product_app:order_confirm' %}" class="btn btn-confirm"> تایید
+                                        سفارش</a>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
             </div>
 
 
@@ -419,127 +548,148 @@
                     <div class="order-detail-container">
 
                         <div class="order-items">
-                            <h3>آیتم‌های سفارش:</h3>
+                            <h3> آیتم‌های سفارش:</h3>
                             {% for order in orders %}
                                 <ul class="order-items-list">
                                     {% for item in order.items.all %}
-
-                                        {#                                        {% if item.product.status == 'in_stock' %}#}
-                                        <li class="order-item">
-                                            <form action="{% url 'product_app:delete_order_item' %}" method="post">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="order_item_id" value="{{ item.id }}">
-                                                <button class="delete-button" type="submit">
+                                        <li class="order-item relative">
+                                            <form action="
+                                                                    {% url 'product_app:delete_order_item' %}" method=
+                                                    "post"
+                                                  class="delete-form">{% csrf_token %}
+                                                <input type="hidden" name="order_item_id" value="
+                                                                    {{ item.id }}">
+                                                <button class="delete-button absolute top-0 right-0"
+                                                        type="submit">
                                                     حذف
                                                 </button>
                                             </form>
                                             <img src="{{ item.product.images.first.image.url }}"
-                                                 alt="{{ item.product.name }}" class="order-item-image">
+                                                 alt="{{ item.product.name }}" class=
+                                                         "order-item-image">
                                             <div class="order-item-details">
-                                                <a href="{% url 'product_app:product_detail' item.product.id %}">{{ item.product.name }}</a>
-
+                                                <a href="
+                                                                    {% url 'product_app:product_detail' item.product.id %}
+                                                                    ">{{ item.product.name }}</a>
                                                 <form class="update-form" method="post"
-                                                      action="{% url 'product_app:update_order_item' %}">
-                                                    {% csrf_token %}
-                                                    <p><strong>تعداد:</strong>
-                                                        <input type="number" name="quantity" value="{{ item.quantity }}"
-                                                               min="1" required
-                                                               style="background-color: #1f2937; color: #ffffff; border-radius: 0.5rem; padding: 0.25rem 0.5rem; text-align: center; width: 60px;">
+                                                      action="{% url 'product_app:update_order_item' %}"
+                                                >{% csrf_token %}
+                                                    <p><strong> تعداد:</strong>
+                                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" required class="quantity-input">
                                                         <input type="hidden" name="item_id" value="{{ item.id }}">
-                                                        <button type="submit">به‌روزرسانی</button>
+                                                        <button type="submit"> به‌روزرسانی</button>
                                                     </p>
                                                 </form>
-
                                                 {% if item.product.discount_percentage %}
-                                                    <span class="text-teal-400 text-lg">
-                    <span class="price">{{ item.product.price|floatformat:0|intcomma }}</span> تومان
-                    {{ item.product.discount_percentage }}% تخفیف
-                                                                            => {{ item.product.get_final_price }} تومان
-                </span>
+                                                    <span class="text-teal-400" style="font-size: 15px">
+                                                                          <span class="price">
+                                                                          {{ item.product.price|floatformat:0|intcomma }}
+                                                                          </span> تومان
+                                                                          {{ item.product.discount_percentage }}% تخفیف
+                                                                          => {{ item.product.get_final_price }} تومان
+                                                                          </span>
                                                 {% endif %}
-                                                <p><strong>قیمت هر آیتم:</strong> {{ item.product.get_final_price }}
-                                                    تومان
-                                                <p><strong>قیمت کل آیتم:</strong> {{ item.get_total_price }} تومان
-                                                </p>
+                                                <p><strong> قیمت هر آیتم:</
+                                                    strong > {{ item.product.get_final_price }} تومان</
+                                                p >
+                                                <p><strong> قیمت کل آیتم:</
+                                                    strong > {{ item.get_total_price }} تومان</p>
                                             </div>
-                                        </li>
-                                        {#                                        {% endif %}#}
-
-                                    {% empty %}
-                                        <p>هیچ آیتمی برای این سفارش وجود ندارد.</p>
+                                        </li>{% empty %}
+                                        <p> هیچ آیتمی برای این سفارش وجود ندارد.</p>
                                     {% endfor %}
                                 </ul>
                             {% endfor %}
                         </div>
+
                         <div class="order-details">
                             {% for order in orders %}
                                 <div class="order">
-                                    <p><strong>وضعیت:</strong> {{ order.get_status_display }}</p>
+                                    <p><strong> وضعیت:</strong> {{ order.get_status_display }}</p>
 
-                                    <p><strong>قیمت کل:</strong> {{ order.total_price }} تومان</p>
+                                    <p><strong> قیمت کل:</strong> {{ order.total_price }} تومان</p>
                                     <div class="discount-code-container">
                                         {% if messages %}
                                             <div class="messages">
                                                 {% for message in messages %}
-                                                    <div class="message {{ message.tags }}">
-                                                        {{ message }}
+                                                    <div class=
+                                                                 "message
+                                                                                                        {{ message.tags }}
+                                                                                                        ">{{ message }}
                                                     </div>
                                                 {% endfor %}
                                             </div>
                                         {% endif %}
                                         {% if order.discount_code %}
-                                            <div class="discount-section " style="background-color: #2c2c2c">
+                                            <div class="discount-section " style=
+                                                    "background-color: #2c2c2c">
                                                 <div>
-                                                    <p><strong>کد تخفیف:</strong> {{ order.discount_code.name }}
+                                                    <p><strong> کد تخفیف:</
+                                                        strong > {{ order.discount_code.name }}
                                                     </p>
-                                                    <span>سود شما از این خرید <strong
-                                                            style="color: #4CAF50">{{ order.get_discount_price|floatformat:0|intcomma }}</strong> معادل <strong
-                                                            style="color: #4CAF50">{{ order.discount_code.discount }}%</strong> از کل سفارش</span>
+                                                    <span> سود شما از این خرید <strong
+                                                            style=
+                                                                    "color: #4CAF50">
+                                                                               {{ order.get_discount_price|floatformat:0|intcomma }}
+                                                                               </strong> معادل <strong
+                                                            style="color: #4CAF50">
+                                                                               {{ order.discount_code.discount }}%</
+                                                                               strong > از کل سفارش</span>
                                                 </div>
-                                                <form method="post" action="{% url 'product_app:remove_discount' %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit">حذف کد تخفیف</button>
+                                                <form method="post" action="
+                                                                               {% url 'product_app:remove_discount' %}"
+                                                >{% csrf_token %}
+                                                    <button type="submit"> حذف کد تخفیف</
+                                                    button >
                                                 </form>
-                                            </div>
-                                        {% else %}
+                                            </div>{% else %}
                                             <div class="discount-section">
-                                                <form method="post" action="{% url 'product_app:apply_discount' %}">
-                                                    {% csrf_token %}
-                                                    <label for="discount_code">کد تخفیف:</label>
-                                                    <input type="text" id="discount_code" name="discount_code"
-                                                           placeholder="کد تخفیف خود را وارد کنید" style="color: #333">
-                                                    <button type="submit" class="delete-button">اعمال تخفیف</button>
+                                                <form method="post" action="
+                                                                               {% url 'product_app:apply_discount' %}"
+                                                >{% csrf_token %}
+                                                    <label for="discount_code"> کد تخفیف:</
+                                                    label >
+                                                    <input type="text" id="discount_code"
+                                                           name="discount_code"
+                                                           placeholder="کد تخفیف خود را وارد کنید"
+                                                           style="color: #333">
+                                                    <button type="submit" class=
+                                                            "delete-button"> اعمال تخفیف
+                                                    </button>
                                                 </form>
                                             </div>
                                         {% endif %}
 
                                     </div>
                                     <div id="addresss">
-                                        <h2>آدرس‌های شما</h2>
+                                        <h2> آدرس‌های شما</h2>
                                         <ul class="address-list">
                                             {% for address in user.addresses.all %}
-                                                <li class="{% if address.id == selected_address_id %}selected{% endif %}">
+                                                <li class="{% if address.id == selected_address_id %}
+                                                                   selected{% endif %}">
                                                     <p>
-                                                        <strong>نام:</strong> {{ address.first_name }} {{ address.last_name }}
+                                                        <strong> نام:</
+                                                        strong > {{ address.first_name }} {{ address.last_name }}
                                                     </p>
-                                                    <p><strong>ایمیل:</strong> {{ address.email }}</p>
-                                                    <p><strong>تلفن:</strong> {{ address.phone }}</p>
-                                                    <p><strong>آدرس:</strong> {{ address.address }}</p>
-                                                    <p><strong>کد پستی:</strong> {{ address.postal_code }}</p>
-                                                    <form action="{% url 'product_app:select_address' address.id %}"
-                                                          method="post">
-                                                        {% csrf_token %}
-                                                        <button type="submit">انتخاب این آدرس</button>
+                                                    <p><strong> ایمیل:</strong> {{ address.email }}</p>
+                                                    <p><strong> تلفن:</strong> {{ address.phone }}</p>
+                                                    <p><strong> آدرس:</strong> {{ address.address }}</p>
+                                                    <p><strong> کد پستی:</strong>
+                                                        {{ address.postal_code }}</p>
+                                                    <form action="
+                                                                   {% url 'product_app:select_address' address.id %}"
+                                                          method="post">{% csrf_token %}
+                                                        <button type="submit"> انتخاب این آدرس</button>
                                                     </form>
-                                                </li>
-                                            {% empty %}
-                                                <p>شما هیچ آدرسی اضافه نکرده‌اید.</p>
+                                                </li>{% empty %}
+                                                <p> شما هیچ آدرسی اضافه نکرده‌اید.</p>
                                             {% endfor %}
                                         </ul>
 
                                         <!-- فرم افزودن آدرس جدید -->
                                         <div class="address-list">
-                                            <a href="{% url 'account_app:addAddress' %}?next={% url 'product_app:order_detail' %}">افزودن
+                                            <a href="{% url 'account_app:addAddress' %}?next=
+                                       {% url 'product_app:order_detail' %}"> افزودن
                                                 آدرس جدید</a>
 
                                         </div>
@@ -548,24 +698,30 @@
                             {% endfor %}
                         </div>
 
-                    </div>
-                {% else %}
-                    <p>هیچ سفارشی پیدا نشد.</p>
+                    </div>{% else %}
+                    <p> هیچ سفارشی پیدا نشد.</p>
                 {% endif %}
                 <!-- FAQ Section -->
                 <div class="mt-8 bg-zinc-700 rounded-2xl shadow-lg p-4">
-                    <h4 class="text-2xl font-semibold mb-4">پرسش‌های متداول</h4>
+                    <h4 class="text-2xl font-semibold mb-4"> پرسش‌های متداول</h4>
                     {% for faq in faqs %}
                         <div class="bg-zinc-800 p-4 rounded-lg mb-4">
-                            <button class="faq-question flex justify-between items-center w-full p-4 text-left text-white bg-zinc-700 rounded-lg focus:outline-none">
+                            <button class=
+                                            "faq-question flex justify-between items-center w-full p-4 text-left text-white bg-zinc-700 rounded-lg focus:outline-none"
+                            >
                                 <span>{{ faq.question }}</span>
-                                <svg class="w-6 h-6 text-white transform transition-transform duration-300" fill="none"
-                                     stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                <svg class=
+                                             "w-6 h-6 text-white transform transition-transform duration-300"
+                                     fill="none"
+                                     stroke="currentColor" viewBox="0 0 24 24" xmlns=
+                                             "http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="2"
                                           d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
-                            <div class="faq-answer mt-2 hidden p-4 bg-zinc-600 rounded-lg">
+                            <div class=
+                                         "faq-answer mt-2 hidden p-4 bg-zinc-600 rounded-lg">
                                 <p>{{ faq.answer }}</p>
                             </div>
                         </div>
@@ -587,7 +743,7 @@
 {% endblock %}
 
 {% block script %}
-        <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.faq-question').forEach(button => {
                 button.addEventListener('click', function () {
@@ -598,10 +754,16 @@
                         answer.classList.remove('show');
                         svg.classList.remove('rotate-180');
                     } else {
-                        document.querySelectorAll('.faq-answer').forEach(answer => answer.classList.remove('show'));
-                        document.querySelectorAll('.faq-question svg').forEach(svg => svg.classList.remove('rotate-180'));
+                        document.querySelectorAll('.faq-answer').forEach(answer = > answer.classList.remove('show')
+                    )
+                        ;
+
+                        document.querySelectorAll('.faq-question svg').forEach(svg = > svg.classList.remove('rotate-180')
+                    )
+                        ;
 
                         answer.classList.add('show');
+
                         svg.classList.add('rotate-180');
                     }
                 });

@@ -184,7 +184,7 @@ class OrderItem(models.Model):
 
     def get_discounted_price(self):
         if self.product.discount_percentage:
-            return self.product.get_final_price() * self.product.discount_percentage /100
+            return self.product.price * self.product.discount_percentage /100
 
 
 
