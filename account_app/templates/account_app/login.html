@@ -37,6 +37,8 @@
             </form>
             <p class="text-sm text-center text-gray-400">حساب کاربری ندارید؟ <a href="{% url 'account_app:signup' %}"
                     class="text-blue-300 hover:underline">ثبت نام کنید</a></p>
+            <p class="text-sm text-center text-gray-400">رمز عبور خود را فراموش کرده اید؟ <a href="{% url 'account_app:send_code' %}"
+                    class="text-blue-300 hover:underline">ریست کردن پسورد</a></p>
         </div>
     </div>
     {% include 'includes/notification_message.html' %}

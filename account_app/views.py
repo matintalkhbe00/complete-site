@@ -1,9 +1,13 @@
+import datetime
 import os
+import random
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import render, get_object_or_404
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
@@ -11,14 +15,17 @@ from django.views.generic import TemplateView, CreateView, UpdateView, DeleteVie
 from home_app.models import FAQ
 from product_app.forms import AddressForm
 from product_app.models import Order, User
-from .forms import CustomLoginForm, UserCreationForm, ContactForm
+from .forms import CustomLoginForm, UserCreationForm, ContactForm, VerifyCodeForm, PhoneNumberForm, PasswordResetForm, \
+    VerifyCode_signupForm
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 from .forms import ProfileEditForm, PasswordChangeCustomForm
-from .models import Address, ContactUs
+from .models import Address, ContactUs, Otp
+from .sms import verification
+from .utils import generate_otp_code, generate_unique_token
 
 
 # Create your views here.
@@ -64,42 +71,108 @@ class LoginView(FormView):
         })
         return context
 
+
+
+
+
 class SignupView(FormView):
     template_name = "account_app/signup.html"
     form_class = UserCreationForm
-    success_url = reverse_lazy('home_app:home')  # صفحه‌ای که پس از ثبت‌نام موفقیت‌آمیز هدایت می‌شود
+    success_url = reverse_lazy('account_app:verify_code_signup')  # صفحه‌ای که کاربر باید کد تایید را وارد کند
 
     def dispatch(self, request, *args, **kwargs):
-        # اگر کاربر قبلاً وارد سیستم شده باشد، او را به صفحه اصلی هدایت کن
         if request.user.is_authenticated:
             messages.info(request, 'شما قبلاً وارد سیستم شده‌اید.')
             return redirect(self.success_url)
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # مقایسه پسوردها
-        password1 = form.cleaned_data.get('password1')
-        password2 = form.cleaned_data.get('password2')
-        if password1 and password2 and password1 != password2:
-            form.add_error('password2', 'رمزهای عبور مطابقت ندارند')
-            return self.form_invalid(form)
-
-        # بررسی تکراری بودن شماره تلفن
         phone = form.cleaned_data.get('phone')
+        email = form.cleaned_data.get('email')
+
         if User.objects.filter(phone=phone).exists():
             form.add_error('phone', 'این شماره تلفن قبلاً ثبت شده است.')
             return self.form_invalid(form)
 
-        # ذخیره کاربر
-        user = form.save()
-        # ورود کاربر به سیستم به صورت خودکار پس از ثبت‌نام
-        login(self.request, user)
-        messages.success(self.request, 'ثبت نام با موفقیت انجام شد!')
-        return super().form_valid(form)
+        if email and User.objects.filter(email=email).exists():
+            form.add_error('email', 'این ایمیل قبلاً ثبت شده است.')
+            return self.form_invalid(form)
 
-    def form_invalid(self, form):
-        messages.error(self.request, 'لطفاً فرم را بررسی کنید.')
-        return super().form_invalid(form)
+        # تولید کد تأیید و توکن
+        code = generate_otp_code()
+        token = generate_unique_token()  # تولید توکن یکتا
+        expiration_date = timezone.now() + datetime.timedelta(minutes=10)  # تنظیم تاریخ انقضا
+
+        # ذخیره اطلاعات OTP
+        Otp.objects.update_or_create(
+            phone=phone,
+            defaults={
+                'code': code,
+                'expiration_date': expiration_date,
+                'token': token
+            }
+        )
+
+        verification(phone, code)  # تابعی برای ارسال پیامک
+        # print(code)
+
+        # ذخیره شماره تلفن و اطلاعات فرم در session برای استفاده در مرحله تایید
+        self.request.session['phone'] = phone
+        self.request.session['signup_form_data'] = form.cleaned_data  # ذخیره اطلاعات فرم برای استفاده در مرحله تایید
+        return redirect(self.success_url)
+
+class VerifyCodeSignupView(FormView):
+    template_name = "account_app/verify_code_signup.html"
+    form_class = VerifyCode_signupForm
+    success_url = reverse_lazy('home_app:home')  # یا هر URL دیگری که بعد از تایید می‌خواهید
+
+    def form_valid(self, form):
+        phone = self.request.session.get('phone')
+        code = form.cleaned_data.get('code')
+
+
+        # چاپ برای بررسی داده‌ها
+        print(f"Phone: {phone}, Code: {code}")
+
+        try:
+            otp = Otp.objects.get(phone=phone, code=code)
+            if otp.expiration_date < timezone.now():
+                form.add_error(None, 'کد تایید منقضی شده است.')
+                return self.form_invalid(form)
+
+            # دریافت اطلاعات فرم ثبت نام از session
+            form_data = self.request.session.get('signup_form_data')
+            if form_data:
+                # ایجاد کاربر جدید
+                user = User(
+                    phone=form_data.get('phone'),
+                    fullname=form_data.get('fullname'),
+                    email=form_data.get('email')
+                )
+                user.set_password(form_data.get('password1'))
+                user.is_active = True
+                user.save()
+                login(self.request, user)
+
+            # پاک‌سازی اطلاعات OTP
+            otp.delete()
+            self.request.session.pop('phone', None)
+            self.request.session.pop('signup_form_data', None)
+
+            messages.success(self.request, 'ثبت نام با موفقیت انجام شد!')
+            return super().form_valid(form)
+        except Otp.DoesNotExist:
+            form.add_error(None, 'کد تایید نامعتبر است.')
+            return self.form_invalid(form)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            print("Form errors:", form.errors)  # برای دیباگ کردن خطاهای فرم
+            return self.form_invalid(form)
+
 
 class LogoutView(View):
     def post(self, request, *args, **kwargs):
@@ -309,3 +382,115 @@ class ContactUsView(LoginRequiredMixin, CreateView):
 
         return context
 
+# ////////////////////////////////////////////////////
+class SendCodeView(View):
+    def get(self, request):
+        form = PhoneNumberForm()
+        return render(request, 'account_app/send_code.html', {'form': form})
+
+    def post(self, request):
+        form = PhoneNumberForm(request.POST)
+        if form.is_valid():
+            phone = form.cleaned_data['phone_number']
+            try:
+                user = User.objects.get(phone=phone)  # به جای profile__phone از phone استفاده کنید
+                code = random.randint(100000, 999999)
+                expiration_date = timezone.now() + datetime.timedelta(minutes=10)
+                Otp.objects.update_or_create(phone=phone, defaults={'code': code, 'expiration_date': expiration_date})
+                verification(phone, code)  # ارسال پیامک کد تایید به کاربر
+                messages.success(request, 'کد تایید برای شما ارسال شد.')
+                return redirect('account_app:verify_code', phone=phone)
+            except User.DoesNotExist:
+                messages.error(request, 'کاربری با این شماره تلفن وجود ندارد.')
+        return render(request, 'account_app/send_code.html', {'form': form})
+
+
+class VerifyCodeView(View):
+    def get(self, request, phone):
+        form = VerifyCodeForm()
+        return render(request, 'account_app/verify_code.html', {'form': form, 'phone': phone})
+
+    def post(self, request, phone):
+        form = VerifyCodeForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data['code']
+            try:
+                otp = Otp.objects.get(phone=phone, code=code)
+                if otp.is_valid():  # فرض می‌کنیم که شما متدی برای بررسی اعتبار کد دارید
+                    request.session['verified_phone'] = phone
+                    return redirect('account_app:reset_password', phone=phone)
+                else:
+                    messages.error(request, 'کد تایید منقضی شده است.')
+            except Otp.DoesNotExist:
+                messages.error(request, 'کد تایید نادرست است.')
+        return render(request, 'account_app/verify_code.html', {'form': form, 'phone': phone})
+
+
+class ResetPasswordView(View):
+    def get(self, request, phone):
+        if 'verified_phone' not in request.session or request.session['verified_phone'] != phone:
+            messages.error(request, 'ابتدا باید کد تایید را وارد کنید.')
+            return redirect('account_app:verify_code', phone=phone)
+
+        form = PasswordResetForm()
+        return render(request, 'account_app/reset_password.html', {'form': form, 'phone': phone})
+
+    def post(self, request, phone):
+        if 'verified_phone' not in request.session or request.session['verified_phone'] != phone:
+            messages.error(request, 'ابتدا باید کد تایید را وارد کنید.')
+            return redirect('account_app:verify_code', phone=phone)
+
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            password = form.cleaned_data['password']
+            try:
+                user = User.objects.get(phone=phone)
+                user.set_password(password)
+                user.save()
+                messages.success(request, 'رمز عبور شما با موفقیت تغییر یافت.')
+                del request.session['verified_phone']
+                return redirect('account_app:login')
+            except User.DoesNotExist:
+                messages.error(request, 'کاربری با این شماره تلفن وجود ندارد.')
+        return render(request, 'account_app/reset_password.html', {'form': form, 'phone': phone})
+
+
+def verify_code(request):
+    if request.method == 'POST':
+        form = VerifyCodeForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data['code']
+            phone = request.session.get('phone')
+
+            try:
+                otp = Otp.objects.get(phone=phone)
+                if otp.code == code and otp.expiration_date > datetime.datetime.now():
+                    # ثبت‌نام کاربر
+                    user_data = request.session.get('user_data')
+                    user = User.objects.create(
+                        fullname=user_data['fullname'],
+                        phone=user_data['phone'],
+                        email=user_data['email'],
+                    )
+                    user.set_password(user_data['password1'])
+                    user.save()
+
+                    # ورود کاربر به سیستم
+                    login(request, user)
+
+                    # حذف داده‌های موقت از جلسه
+                    request.session.pop('user_data', None)
+                    request.session.pop('phone', None)
+                    otp.delete()
+
+                    messages.success(request, 'ثبت نام با موفقیت انجام شد!')
+                    return redirect('home_app:home')
+                else:
+                    messages.error(request, 'کد تأیید نادرست یا منقضی شده است.')
+            except Otp.DoesNotExist:
+                messages.error(request, 'کد تأیید نادرست یا منقضی شده است.')
+
+    else:
+        form = VerifyCodeForm()
+
+    return render(request, 'account_app/verify_code_signup.html', {'form': form})

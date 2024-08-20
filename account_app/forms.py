@@ -2,7 +2,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
-from django.core.validators import EmailValidator
+from django.core.validators import EmailValidator, RegexValidator
 
 from .models import User, ContactUs
 from django.contrib.auth.forms import PasswordChangeForm
@@ -21,6 +21,7 @@ class CustomLoginForm(AuthenticationForm):
             'class': 'block w-full p-2 border border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-white placeholder-gray-400',
         })
     )
+
 
 
 class UserCreationForm(forms.ModelForm):
@@ -67,6 +68,16 @@ class UserCreationForm(forms.ModelForm):
         model = User
         fields = ["fullname", "phone", "email", "profile_picture"]
 
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("email")
+        phone = cleaned_data.get("phone")
+
+        # فقط زمانی که ایمیل وجود دارد، بررسی تکراری بودن آن را انجام دهید
+        if email:
+            if User.objects.filter(email=email).exclude(phone=phone).exists():
+                self.add_error('email', 'این ایمیل قبلاً ثبت شده است.')
+
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
@@ -80,6 +91,7 @@ class UserCreationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
 
 class UserChangeForm(forms.ModelForm):
     password = ReadOnlyPasswordHashField()
@@ -136,3 +148,57 @@ class ProfileEditForm(forms.ModelForm):
         if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
             raise ValidationError('این ایمیل قبلاً ثبت شده است.')
         return email
+
+
+
+
+
+class PhoneNumberForm(forms.Form):
+    phone_number = forms.CharField(
+        max_length=15,
+        validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")],
+        label='شماره تلفن',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'شماره تلفن را وارد کنید',
+            'class': 'phone-input',
+
+        })
+    )
+
+
+
+class VerifyCodeForm(forms.Form):
+    code = forms.IntegerField(
+        label='کد تایید',
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'کد تایید را وارد کنید'
+        })
+    )
+
+
+class VerifyCode_signupForm(forms.Form):
+    code = forms.CharField(max_length=6, label='کد تایید')
+
+
+
+class PasswordResetForm(forms.Form):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'رمز عبور جدید را وارد کنید'
+        }),
+        label='رمز عبور جدید'
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'تأیید رمز عبور جدید'
+        }),
+        label='تایید رمز عبور جدید'
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password != confirm_password:
+            self.add_error('confirm_password', "رمز عبور و تأیید رمز عبور باید مطابقت داشته باشند.")

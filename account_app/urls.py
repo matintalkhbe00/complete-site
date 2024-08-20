@@ -22,4 +22,10 @@ urlpatterns = [
     path('password_change/', views.PasswordChangeViewCustom.as_view(), name='password_change'),
     # //////////////////////////////////////////////////////
     path('contact/', views.ContactUsView.as_view(), name='contact_form_submit'),
+    # //////////////////////////////////////////////////////
+    path('send_code/', views.SendCodeView.as_view(), name='send_code'),
+    path('verify_code/<str:phone>/', views.VerifyCodeView.as_view(), name='verify_code'),
+    path('reset_password/<str:phone>/', views.ResetPasswordView.as_view(), name='reset_password'),
+    path('verify-code/', views.VerifyCodeSignupView.as_view(), name='verify_code_signup'),
+
 ]

@@ -30,7 +30,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         verbose_name="ایمیل",
         max_length=255,
-        unique=True,
+
         null=True,
         blank=True
     )
@@ -92,6 +92,13 @@ class Otp(models.Model):
 
     def __str__(self):
         return self.phone
+
+    def is_valid(self):
+        """
+        Check if the OTP code is still valid.
+        """
+        now = timezone.now()
+        return now <= self.expiration_date
 
 
 class ContactUs(models.Model):

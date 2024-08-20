@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+{% block style %}
+    <style>
+        .field-errors {
+            color: white; /* تغییر رنگ خطا به قرمز برای برجسته‌تر کردن */
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+<main class="container py-[75px]">
+    <div class="flex items-center justify-center h-screen bg-zinc-600 font-DanaRegular">
+        <div class=" w-full max-w-md p-8 space-y-3 rounded-xl bg-zinc-800 shadow-md">
+            <h1 class="text-2xl font-bold text-center text-white">تأیید کد</h1>
+            <form method="POST" action="{% url 'account_app:verify_code' phone=phone %}" class="space-y-5">
+                {% csrf_token %}
+                <div class="field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+                <div class="flex">
+                    <label class="block mb-1 text-sm font-medium text-white" for="{{ form.code.id_for_label }}" style="margin-left: 10px">کد تایید</label>
+                    {{ form.code }}
+
+                </div>
+                <div class="field-errors">
+                        {{ form.code.errors }}
+                    </div>
+                <button type="submit"
+                    class="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">تأیید کد</button>
+            </form>
+            {% if messages %}
+                <div class="mt-4" style="color: white">
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% include 'includes/notification_message.html' %}
+</main>
+{% endblock %}

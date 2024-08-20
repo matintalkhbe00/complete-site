@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+{% block style %}
+    <style>
+        .field-errors {
+            color: white; /* تغییر رنگ خطا به قرمز برای برجسته‌تر کردن */
+        }
+
+        /* استایل برای ورودی شماره تلفن */
+        .phone-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .phone-input:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        /* استایل برای برچسب فرم */
+        .phone-input + label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* استایل برای پیغام خطا */
+        form .errorlist {
+            color: red;
+            font-size: 14px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block main %}
+    <main class="container py-[75px]">
+        <div class="flex items-center justify-center h-screen bg-zinc-600 font-DanaRegular">
+            <div class="w-full max-w-md p-8 space-y-3 rounded-xl bg-zinc-800 shadow-md">
+                <h1 class="text-2xl font-bold text-center text-white">بازیابی رمز عبور</h1>
+                <form method="POST" action="{% url 'account_app:send_code' %}" class="space-y-5">
+                    {% csrf_token %}
+                    <div class="field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                    <div class="flex">
+                        <label class="block text-sm font-medium text-white" for="{{ form.phone_number.id_for_label }}"
+                               style="margin-left: 10px">شماره تلفن</label>
+                        {{ form.phone_number }}
+
+                    </div>
+                    <div class="field-errors">
+                        {{ form.phone_number.errors }}
+                    </div>
+                    <button type="submit"
+                            class="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        ارسال پیامک
+                    </button>
+                </form>
+                {% if messages %}
+                    <div class="mt-4" style="color: white">
+                        <ul>
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% include 'includes/notification_message.html' %}
+    </main>
+{% endblock %}
