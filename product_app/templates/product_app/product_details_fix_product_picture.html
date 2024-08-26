@@ -1,0 +1,656 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+{% block style %}
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="{% static 'style/swiper-bundle.min.css' %}">
+    <link rel="stylesheet" href="{% static 'style/comment.css' %}">
+    <style>
+        /* Global Styles */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        section {
+            display: grid;
+            grid-template-columns: 50% 45%;
+            place-items: center;
+            gap: 60px;
+            min-height: 100vh;
+            padding: 20px 60px;
+        }
+
+        .content {
+            max-width: 2400px;
+        }
+
+        .content h1, .content p {
+            color: #fff;
+        }
+
+        .content h1 {
+            font-family: "Comfortaa", sans-serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: 1px;
+            margin-bottom: 36px;
+        }
+
+        .content p {
+            font-size: clamp(1rem, 4vw, 1.1rem);
+            font-weight: 300;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .content button {
+            background: #eaeaea;
+            color: #202134;
+            font-size: clamp(0.9rem, 4vw, 1rem);
+            font-weight: 600;
+            border: 0;
+            outline: 0;
+            padding: 8px 14px;
+            border-radius: 7px;
+            transition: all 0.4s ease-in;
+            cursor: pointer;
+        }
+
+        .content button:hover, .content button:focus {
+            transform: scale(0.98);
+            background-color: #6f7aa6;
+            color: #eaeaea;
+        }
+
+        /* Swiper Styles */
+        .swiper {
+            position: relative;
+            width: 400px;
+            height: 520px;
+            overflow: hidden;
+            padding: 15px;
+        }
+
+        .swiper-wrapper {
+            display: flex;
+            transition: transform 0.4s ease;
+        }
+
+        .swiper-slide {
+            flex: 0 0 100%;
+            height: 100%;
+            background-position: center;
+            background-size: cover;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .cost {
+            position: absolute;
+            top: 8px;
+            right: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(6px);
+            border-radius: 30px;
+            padding: 6px 10px;
+            color: #fff;
+            font-size: clamp(0.8rem, 4vw, 0.9rem);
+            font-weight: 600;
+        }
+
+        .dark-text {
+            color: #202134;
+        }
+
+        .swiper-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            padding: 10px 20px;
+            background: rgba(93, 95, 145, 0.2);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .overlay h1 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            font-weight: 600;
+        }
+
+        .overlay p {
+            font-size: clamp(0.8rem, 4vw, 0.9rem);
+            font-weight: 300;
+            line-height: 1.3;
+        }
+
+        .ratings {
+            display: flex;
+            column-gap: 10px;
+            margin-top: -6px;
+        }
+
+        .ratings span {
+            font-size: clamp(0.8rem, 4vw, 0.9rem);
+            font-weight: 300;
+        }
+
+        .star {
+            color: #afe312;
+        }
+
+        @media (max-width: 1050px) {
+            .swiper {
+                width: 350px;
+                height: 450px;
+            }
+        }
+
+        @media (max-width: 930px) {
+            section {
+                grid-template-columns: 100%;
+                grid-template-rows: 55% 40%;
+                grid-template-areas:
+                "slider"
+                "content";
+                padding: 60px;
+            }
+
+            .swiper {
+                grid-area: slider;
+            }
+
+            .content {
+                grid-area: content;
+                text-align: center;
+            }
+
+            .content h1 {
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 470px) {
+            section {
+                padding: 40px 40px 60px;
+            }
+
+            .swiper {
+                width: 300px;
+                height: 400px;
+            }
+        }
+
+        /* Tabs and Sub-Tabs */
+        .tab-button, .sub-tab-button {
+            background: transparent;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .tab-content, .sub-tab-content {
+            display: none;
+        }
+
+        .tab-content.active, .sub-tab-content.active {
+            display: block;
+        }
+
+        input, textarea {
+            color: #000000; /* رنگ متن */
+            background-color: #f9f9f9; /* رنگ پس‌زمینه برای تفاوت با متن */
+            border: 1px solid #ccc; /* حاشیه */
+            padding: 0.5rem; /* فاصله داخلی */
+            border-radius: 0.25rem; /* گوشه‌های گرد */
+            font-size: 1rem; /* اندازه فونت */
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block main %}
+    <main class="text-white font-DanaRegular md:py-[150px]">
+        <div class="container mx-auto p-4">
+            <!-- Main Container -->
+            <div class="flex flex-col lg:flex-row-reverse gap-6">
+                <!-- Product Slider -->
+                <div class="swiper" id="slider">
+                    {% if product_images %}
+                        <div class="swiper-wrapper">
+
+
+                            {% for image in product_images %}
+                                <div class="swiper-slide">
+                                    <img src="{{ image.image.url }}" alt="{{ image.alt_text }}" class="w-full h-auto">
+                                    {% if product.discount_percentage and product.status == "in_stock" %}
+                                        <span class="absolute block top-1 right-1 bg-orange-300 h-5 md:h-[30px] rounded-full px-2.5 md:px-3 py-1 font-DanaDemiBold text-xs md:text-base text-white dark:text-zinc-700">
+                                        {{ product.discount_percentage }}%
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+
+                <!-- Product Details -->
+                <div class="flex-1 bg-zinc-700 p-6 rounded-lg shadow-lg relative">
+                    <h4 class="text-2xl font-semibold mb-4">{{ product.name }}</h4>
+                    {% if product.status == 'in_stock' %}
+                        <div class="mb-4">
+                            {% if product.discount_percentage %}
+
+                                <span class="text-teal-400 text-lg">
+                    <span class="price">{{ product.price|floatformat:0|intcomma }}</span> تومان
+                    {{ product.discount_percentage }}% تخفیف
+                </span>
+                            {% else %}
+                       <div class="text-3xl text-teal-400 font-bold mb-4">
+                            <span class="final-price">{{ product.get_final_price|floatformat:0|intcomma }}</span>
+                            <span class="text-lg"> تومان</span>
+                        </div>
+                            {% endif %}
+                        </div>
+                        {% if product.discount_percentage %}
+                        <div class="text-3xl font-bold mb-4">
+                            <span class="final-price">{{ product.get_final_price|floatformat:0|intcomma }}</span>
+                            <span class="text-lg"> تومان</span>
+                        </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="text-red-400 text-base md:text-xl">
+                            محصول موجود نیست
+                        </div>
+                    {% endif %}
+
+                    <p class="text-zinc-300 mt-2 mb-bmd-15">
+                        {{ product.description|slice:":300" }}{% if product.description|length > 300 %}...{% endif %}
+                    </p>
+
+                    <!-- بخش دکمه و تعداد -->
+                    {% if product.status == 'in_stock' %}
+                        <form action="{% url 'product_app:product_add' product.id %}" method="post"
+                              style="position: absolute; bottom: 24px; left: 24px; display: flex; align-items: center; gap: 16px;">
+                            {% csrf_token %}
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label for="quantity" style="color: #ffffff; font-size: 1rem;">تعداد:</label>
+                                <input type="number" id="quantity" name="quantity" min="1" value="1"
+                                       style="background-color: #1f2937; color: #ffffff; border-radius: 0.5rem; padding: 0.25rem 0.5rem; text-align: center; width: 60px;">
+                            </div>
+                            <button type="submit"
+                                    style="background-color: #0d9488; color: #ffffff; font-size: 1.125rem; border-radius: 1rem; padding: 0.75rem 1.5rem; text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.3s ease; display: inline-block; font-weight: bold;"
+                                    onmouseover="this.style.backgroundColor='#0f766e'; this.style.transform='scale(1.1)';"
+                                    onmouseout="this.style.backgroundColor='#0d9488'; this.style.transform='scale(1)';">
+                                ثبت سفارش
+                            </button>
+                        </form>
+                    {% endif %}
+
+
+                </div>
+
+            </div>
+
+            <!-- Product Tabs -->
+            <div class="mt-8 bg-zinc-700 rounded-2xl shadow-lg">
+                <!-- Navigation Tabs -->
+                <div class="flex border-b border-zinc-600">
+                    <button id="tab-description" class="w-1/3 py-3 text-center tab-button active">توضیحات محصول</button>
+                    <button id="tab-specs" class="w-1/3 py-3 text-center tab-button">ویژگی‌های محصول</button>
+                    <button id="tab-reviews" class="w-1/3 py-3 text-center tab-button">نظرات</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div id="content-description" class="tab-content p-4 ">
+                    <div class="bg-zinc-800 p-4 rounded-lg">
+                        <h5 class="text-xl font-semibold mb-2">توضیحات محصول</h5>
+                        <p class="text-zinc-300">
+                            {{ product.description }}</p>
+                    </div>
+                </div>
+                <div id="content-specs" class="tab-content p-4 active">
+                    <div class="bg-zinc-800 p-4 rounded-lg">
+                        <ul class="list-disc pl-5 text-zinc-300">
+                            <h5 class="text-xl font-semibold mb-2">ویژگی های محصول</h5>
+                            {% for feature in product_features %}
+                                <li style="margin-right: 20px">{{ feature }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div id="content-reviews" class="tab-content">
+                    <div class="bg-zinc-800 p-4 rounded-2xl">
+                        <!-- Sub-Tabs for Reviews -->
+                        <div class="sub-tabs flex border-b border-zinc-600 rounded-2xl mb-4">
+                            <button id="sub-tab-reviews-all" class="w-1/3 py-2 text-center sub-tab-button ">همه
+                                نظرات
+                            </button>
+                            <button id="sub-tab-reviews-my" class="w-1/3 py-2 text-center sub-tab-button">نظرات من
+                            </button>
+                            <button id="sub-tab-reviews-add" class="w-1/3 py-2 text-center sub-tab-button active">افزودن
+                                نظر
+                            </button>
+                        </div>
+
+                        <!-- Sub-Tab Contents -->
+                        <div id="sub-content-reviews-all" class="sub-tab-content active scrollable-section">
+                            {% for review in product_reviews %}
+                                <div class="review-item bg-zinc-700 p-4 mb-4 rounded-lg shadow-md">
+                                    <div class="flex items-start mb-4">
+                                        <img src="https://via.placeholder.com/40" alt="User Avatar"
+                                             class="w-10 h-10 rounded-full">
+                                        <div class="ml-4 flex-1">
+                                            <h6 class="font-semibold">{{ review.author }}</h6>
+                                            <p class="text-zinc-300">{{ review.comment }}</p>
+                                            {% if review.replies.exists %}
+                                                <div class="ml-6 mt-4">
+                                                    {% for reply in review.replies.all %}
+                                                        <div class="review-item bg-zinc-600 p-2 rounded-lg mb-2">
+                                                            <p><strong>{{ reply.author }}:</strong> {{ reply.comment }}
+                                                            </p>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            <!-- Reply Form -->
+                                            <button onclick="toggleReplyForm({{ review.id }})"
+                                                    class="text-blue-400 mt-2">پاسخ
+                                            </button>
+                                            <div id="reply-form-{{ review.id }}" class="reply-form mt-2 hidden">
+                                                <form method="post"
+                                                      action="{% url 'product_app:add_reply' review.id %}?active_tab=reviews">
+                                                    {% csrf_token %}
+                                                    <textarea name="comment" rows="3"
+                                                              placeholder="پاسخ خود را بنویسید..."
+                                                              class="w-full p-2 rounded-lg"
+                                                              style="color: black"></textarea>
+                                                    <button type="submit"
+                                                            class="mt-2 bg-green-500 text-white py-1 px-4 rounded-lg">
+                                                        ارسال پاسخ
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div>
+                                    <p>نظری برای محصول ثبت نشده (شما می تونید اولین نفر باشید ^_^)</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div id="sub-content-reviews-my" class="sub-tab-content scrollable-section">
+                            <h6 class="text-lg font-semibold mb-2 ">نظرات من</h6>
+                            {% if user_reviews %}
+                                {% for review in user_reviews %}
+                                    <div class="review-item bg-zinc-700 p-4 mb-4 rounded-lg shadow-md ">
+                                        <div class="flex items-start mb-4">
+                                            <img src="https://via.placeholder.com/40" alt="User Avatar"
+                                                 class="w-10 h-10 rounded-full">
+                                            <div class="ml-4 flex-1">
+                                                <h6 class="font-semibold">{{ review.author }}</h6>
+                                                <p class="text-zinc-300">{{ review.comment }}</p>
+                                                <p class="text-xs text-gray-400">{{ review.created_at|date:"d M Y H:i" }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p>شما هنوز نظری برای این محصول ارسال نکرده‌اید.</p>
+                            {% endif %}
+                        </div>
+
+                        <div id="sub-content-reviews-add" class="sub-tab-content">
+                            <div class="bg-zinc-800 p-4 rounded-lg shadow-inner">
+                                <h6 class="text-lg font-semibold mb-2">افزودن نظر</h6>
+                                <form method="post" action="{% url 'product_app:product_detail' product.id %}"
+                                      class="space-y-4 p-4 border border-gray-300 rounded-lg shadow-md bg-white">
+                                    {% csrf_token %}
+
+                                    <div class="mb-4">
+                                        <label for="{{ form.comment.id_for_label }}"
+                                               class="block text-gray-700 font-medium">نظر</label>
+                                        {{ form.comment }}
+                                        {% if form.comment.errors %}
+                                            <p class="text-red-500 text-sm">{{ form.comment.errors }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="{{ form.rating.id_for_label }}"
+                                               class="block text-gray-700 font-medium">امتیاز</label>
+                                        {{ form.rating }}
+                                        {% if form.rating.errors %}
+                                            <p class="text-red-500 text-sm">{{ form.rating.errors }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <input type="hidden" name="parent_id" value=""/>
+
+                                    <button type="submit"
+                                            class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out">
+                                        ارسال نظر
+                                    </button>
+                                </form>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function updateBorder() {
+            var container = document.querySelector('.container');
+            if (window.innerWidth < 680) {
+                container.style.borderBottom = '1px solid #ccc'; // Add border if less than 680px
+            } else {
+                container.style.borderBottom = 'none'; // Remove border if 680px or more
+            }
+        }
+
+        window.addEventListener('resize', updateBorder);
+        window.addEventListener('load', updateBorder);
+
+        function toggleReplyForm(reviewId) {
+            const form = document.getElementById(`reply-form-${reviewId}`);
+            form.classList.toggle('hidden');
+        }
+
+        function activateTab(tabId) {
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            const tabButton = document.getElementById(tabId);
+            tabButton.classList.add('active');
+            const tabContentId = `content-${tabId.replace('tab-', '')}`;
+            document.getElementById(tabContentId).classList.add('active');
+        }
+
+        function activateSubTab(subTabId) {
+            document.querySelectorAll('.sub-tab-button').forEach(button => button.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
+
+            const subTabButton = document.getElementById(subTabId);
+            subTabButton.classList.add('active');
+            const subTabContentId = `sub-content-${subTabId.replace('sub-tab-', '')}`;
+            document.getElementById(subTabContentId).classList.add('active');
+        }
+
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function () {
+                activateTab(this.id);
+                if (this.id === 'tab-reviews') {
+                    // When the "Reviews" tab is activated, activate all sub-tabs
+                    document.querySelectorAll('.sub-tab-button').forEach(btn => btn.classList.add('active'));
+                } else {
+                    document.querySelectorAll('.sub-tab-button').forEach(btn => btn.classList.remove('active'));
+                }
+            });
+        });
+
+        document.querySelectorAll('.sub-tab-button').forEach(button => {
+            button.addEventListener('click', function () {
+                activateSubTab(this.id);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Tabs
+            activateTab('tab-specs');
+
+            // Swiper Initialization
+            const swiper = new Swiper(".swiper", {
+                effect: "cube",
+                grabCursor: true,
+                loop: true,
+                speed: 1000,
+                cubeEffect: {
+                    shadow: false,
+                    slideShadows: true,
+                    shadowOffset: 10,
+                    shadowScale: 0.94,
+                },
+                autoplay: {
+                    delay: 2600,
+                    pauseOnMouseEnter: true,
+                },
+                navigation: {
+                    nextEl: '#next',
+                    prevEl: '#prev',
+                },
+            });
+
+            // tsParticles Initialization
+            tsParticles.load("tsparticles", {
+                fpsLimit: 60,
+                backgroundMode: {
+                    enable: true,
+                    zIndex: -1,
+                },
+                particles: {
+                    number: {
+                        value: 30,
+                        density: {
+                            enable: true,
+                            area: 800,
+                        },
+                    },
+                    color: {
+                        value: ["#3998D0", "#2EB6AF", "#A9BD33", "#FEC73B", "#F89930", "#F45623", "#D62E32"],
+                    },
+                    destroy: {
+                        mode: "split",
+                        split: {
+                            count: 1,
+                            factor: {
+                                value: 5,
+                                random: {
+                                    enable: true,
+                                    minimumValue: 4,
+                                },
+                            },
+                            rate: {
+                                value: 10,
+                                random: {
+                                    enable: true,
+                                    minimumValue: 5,
+                                },
+                            },
+                            particles: {
+                                collisions: {
+                                    enable: false,
+                                },
+                                destroy: {
+                                    mode: "none",
+                                },
+                                life: {
+                                    count: 1,
+                                    duration: {
+                                        value: 1,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    shape: {
+                        type: "circle",
+                        stroke: {
+                            width: 0,
+                            color: "#000000",
+                        },
+                        polygon: {
+                            sides: 5,
+                        },
+                    },
+                    opacity: {
+                        value: 1,
+                        animation: {
+                            enable: false,
+                            speed: 1,
+                            minimumValue: 0.1,
+                            sync: false,
+                        },
+                    },
+                    size: {
+                        value: 8,
+                        random: {
+                            enable: true,
+                            minimumValue: 4,
+                        },
+                        animation: {
+                            enable: false,
+                            speed: 40,
+                            minimumValue: 0.1,
+                            sync: false,
+                        },
+                    },
+                    collisions: {
+                        enable: true,
+                        mode: "destroy",
+                    },
+                    move: {
+                        enable: true,
+                        speed: 7,
+                        direction: "none",
+                        out_mode: "out",
+                    },
+                },
+                detectRetina: true,
+            })
+        });
+    </script>
+{% endblock %}
+
+

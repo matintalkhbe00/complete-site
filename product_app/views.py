@@ -10,7 +10,7 @@ from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.db import transaction
 
-from account_app.models import Address
+from account_app.models import Address, User
 from home_app.models import FAQ
 from .forms import ProductReviewForm, ReplyForm, OrderItemUpdateForm, OrderItemDeleteForm, AddressForm
 from .models import Product, ProductReview, Order, OrderItem, DiscountCode
@@ -29,7 +29,7 @@ def add_reply(request, review_id):
         if form.is_valid():
             reply = form.save(commit=False)
             reply.product = review.product
-            reply.author = request.user.fullname if request.user.fullname else request.user.phone
+            reply.user = request.user  # استفاده از کاربر فعلی به عنوان نویسنده
             reply.parent = review
             reply.save()
             return HttpResponseRedirect(
@@ -45,9 +45,32 @@ class ProductDetailView(View):
         product_images = product.images.all()
         product_features = product.features.all()
         product_reviews = product.reviews.filter(parent__isnull=True).prefetch_related('replies')
-        user_reviews = product.reviews.filter(author=request.user.phone)
-
+        user_reviews = product.reviews.filter(user=request.user)
+        faqs = FAQ.objects.all()
         form = ProductReviewForm()
+
+        # Fetch user profile pictures safely
+        # user_profiles = {}
+        # review_users = set(review.user for review in product_reviews)
+        # for user in review_users:
+        #     if user.profile_picture:
+        #         user_profiles[user.id] = user.profile_picture.url
+        #
+
+        # بررسی وجود محصول در سبد خرید
+        product_in_cart = False
+        product_quantity = 0
+
+        # جستجو در سفارش‌های در حال پردازش یا تایید نشده برای کاربر
+        order_items = OrderItem.objects.filter(
+            order__user=request.user,
+            order__status__in=['notRegistered'],
+            product=product
+        )
+
+        if order_items.exists():
+            product_in_cart = True
+            product_quantity = order_items.first().quantity
 
         context = {
             'product': product,
@@ -56,6 +79,10 @@ class ProductDetailView(View):
             'product_reviews': product_reviews,
             'form': form,
             'user_reviews': user_reviews,
+            'faqs': faqs,
+            'product_in_cart': product_in_cart,
+            'product_quantity': product_quantity,
+
         }
 
         return render(request, 'product_app/product_details.html', context)
@@ -68,12 +95,13 @@ class ProductDetailView(View):
         if form.is_valid():
             review = form.save(commit=False)
             review.product = product
-            review.author = request.user.phone
+            review.user = request.user
             parent_id = request.POST.get('parent_id')
             if parent_id:
                 review.parent = ProductReview.objects.get(id=parent_id)
             review.save()
         return redirect('product_app:product_detail', pk=product.id)
+
 
 
 class ProductListView(ListView):

@@ -3,6 +3,9 @@
 {% load humanize %}
 {% block style %}
     <!-- Swiper CSS -->
+    {#    <script src='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js'></script>#}
+    {##}
+    {#    <script src='https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js'></script>#}
     <link rel="stylesheet" href="{% static 'style/swiper-bundle.min.css' %}">
     <link rel="stylesheet" href="{% static 'style/comment.css' %}">
     <style>
@@ -65,6 +68,63 @@
             color: #eaeaea;
         }
 
+
+        /* Tabs and Sub-Tabs */
+        .tab-button, .sub-tab-button {
+            background: transparent;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .tab-content, .sub-tab-content {
+            display: none;
+        }
+
+        .tab-content.active, .sub-tab-content.active {
+            display: block;
+        }
+
+        input, textarea {
+            color: #000000; /* رنگ متن */
+            background-color: #f9f9f9; /* رنگ پس‌زمینه برای تفاوت با متن */
+            border: 1px solid #ccc; /* حاشیه */
+            padding: 0.5rem; /* فاصله داخلی */
+            border-radius: 0.25rem; /* گوشه‌های گرد */
+            font-size: 1rem; /* اندازه فونت */
+        }
+
+    </style>
+    <style>
+        .faq-question {
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background-color: #0f766e;
+        }
+
+        .faq-answer {
+            display: none;
+        }
+
+        .faq-answer.show {
+            display: block;
+        }
+
+        .faq-question .svg {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active .svg {
+            transform: rotate(180deg);
+        }
+    </style>
+
+    <style>
         /* Swiper Styles */
         .swiper {
             position: relative;
@@ -196,63 +256,46 @@
                 height: 400px;
             }
         }
-
-        /* Tabs and Sub-Tabs */
-        .tab-button, .sub-tab-button {
-            background: transparent;
-            border: none;
-            padding: 15px;
-            cursor: pointer;
-            font-size: 1rem;
-            color: #fff;
-        }
-
-        .tab-content, .sub-tab-content {
-            display: none;
-        }
-
-        .tab-content.active, .sub-tab-content.active {
-            display: block;
-        }
-
-        input, textarea {
-            color: #000000; /* رنگ متن */
-            background-color: #f9f9f9; /* رنگ پس‌زمینه برای تفاوت با متن */
-            border: 1px solid #ccc; /* حاشیه */
-            padding: 0.5rem; /* فاصله داخلی */
-            border-radius: 0.25rem; /* گوشه‌های گرد */
-            font-size: 1rem; /* اندازه فونت */
-        }
-
     </style>
     <style>
-        .faq-question {
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+        /* xl:w-[500px] */
+        @media (min-width: 1280px) {
+            .xl\:w-\[500px\] {
+                width: 500px;
+                display: block;
+            }
+
         }
 
-        .faq-question:hover {
-            background-color: #0f766e;
+        /* lg:w-[300px] */
+        @media (min-width: 1024px) and (max-width: 1279px) {
+            .lg\:w-\[300px\] {
+                width: 240px;
+                display: block;
+            }
+
         }
 
-        .faq-answer {
-            display: none;
+        /* md:w-[400px] */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .md\:w-\[400px\] {
+                width: 400px;
+                display: block;
+            }
+
         }
 
-        .faq-answer.show {
-            display: block;
+        /* sm:w-[220px] */
+        @media (min-width: 640px) and (max-width: 767px) {
+            .sm\:w-\[220px\] {
+                display: none;
+            }
+
+            margin-bottom: 10px;
         }
 
-        .faq-question .svg {
-            transition: transform 0.3s ease;
-        }
 
-        .faq-question.active .svg {
-            transform: rotate(180deg);
-        }
     </style>
-
-
 {% endblock %}
 
 {% block main %}
@@ -273,6 +316,7 @@
                                         <span class="absolute block top-1 right-1 bg-orange-300 h-5 md:h-[30px] rounded-full px-2.5 md:px-3 py-1 font-DanaDemiBold text-xs md:text-base text-white dark:text-zinc-700">
                                         {{ product.discount_percentage }}%
                                     </span>
+                                        {#                                        <div class="cost">{{ product.discount_percentage }}%</div>#}
                                     {% endif %}
                                 </div>
                             {% endfor %}
@@ -318,28 +362,66 @@
 
                     <!-- بخش دکمه و تعداد -->
                     {% if product.status == 'in_stock' %}
-                        <form action="{% url 'product_app:product_add' product.id %}" method="post"
-                              style="position: absolute; bottom: 24px; left: 24px; display: flex; align-items: center; gap: 16px;">
-                            {% csrf_token %}
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <label for="quantity" style="color: #ffffff; font-size: 1rem;">تعداد:</label>
-                                <input type="number" id="quantity" name="quantity" min="1" value="1"
-                                       style="background-color: #1f2937; color: #ffffff; border-radius: 0.5rem; padding: 0.25rem 0.5rem; text-align: center; width: 60px;">
-                            </div>
-                            <button type="submit"
-                                    style="background-color: #0d9488; color: #ffffff; font-size: 1.125rem; border-radius: 1rem; padding: 0.75rem 1.5rem; text-decoration: none;
+                        {% if product_in_cart %}
+
+                            <form action="{% url 'product_app:product_add' product.id %}" method="post"
+                                  style=" position: absolute; bottom: 24px; left: 24px; display: flex; align-items: center; gap: 16px;">
+                                {% csrf_token %}
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label for="quantity" style="color: #ffffff; font-size: 1rem;">تعداد:</label>
+                                    <input type="number" id="quantity" name="quantity" min="1" value="1"
+                                           style="background-color: #1f2937; color: #ffffff; border-radius: 0.5rem; padding: 0.25rem 0.5rem; text-align: center; width: 60px;">
+                                </div>
+                                <button type="submit"
+                                        style="background-color: #0d9488; color: #ffffff; font-size: 1.125rem; border-radius: 1rem; padding: 0.75rem 1.5rem; text-decoration: none;
   transition: background-color 0.3s ease, transform 0.3s ease; display: inline-block; font-weight: bold;"
-                                    onmouseover="this.style.backgroundColor='#0f766e'; this.style.transform='scale(1.1)';"
-                                    onmouseout="this.style.backgroundColor='#0d9488'; this.style.transform='scale(1)';">
-                                ثبت سفارش
-                            </button>
-                        </form>
+                                        onmouseover="this.style.backgroundColor='#0f766e'; this.style.transform='scale(1.1)';"
+                                        onmouseout="this.style.backgroundColor='#0d9488'; this.style.transform='scale(1)';">
+                                    ثبت سفارش
+                                </button>
+                            </form>
+
+                            <!-- نمایش پیام زیر فرم -->
+                            {% if product_quantity > 0 %}
+                                <p class="xl:w-[500px] lg:w-[300px] md:w-[400px] sm:w-[220px] hidden"
+                                   style="position: absolute; bottom: 24px; right: 24px; color: #ffffcc; word-wrap: break-word; overflow-wrap: break-word; text-align: right;">
+                                    خواستم بگم حواست باشه از قبل <strong
+                                        style="color: #0d9488;">{{ product_quantity }}</strong> عدد از این محصول توی
+                                    سبدت داری
+                                </p>
+
+                            {% endif %}
+
+
+
+                        {% else %}
+                            <form action="{% url 'product_app:product_add' product.id %}" method="post"
+                                  style="position: absolute; bottom: 24px; left: 24px; display: flex; align-items: center; gap: 16px;">
+                                {% csrf_token %}
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label for="quantity" style="color: #ffffff; font-size: 1rem;">تعداد:</label>
+                                    <input type="number" id="quantity" name="quantity" min="1" value="1"
+                                           style="background-color: #1f2937; color: #ffffff; border-radius: 0.5rem; padding: 0.25rem 0.5rem; text-align: center; width: 60px;">
+                                </div>
+                                <button type="submit"
+                                        style="background-color: #0d9488; color: #ffffff; font-size: 1.125rem; border-radius: 1rem; padding: 0.75rem 1.5rem; text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.3s ease; display: inline-block; font-weight: bold;"
+                                        onmouseover="this.style.backgroundColor='#0f766e'; this.style.transform='scale(1.1)';"
+                                        onmouseout="this.style.backgroundColor='#0d9488'; this.style.transform='scale(1)';">
+                                    ثبت سفارش
+                                </button>
+                            </form>
+                        {% endif %}
+
                     {% endif %}
 
 
                 </div>
 
             </div>
+
+
+            {#        /////////////////////////////////////////////////////////////////////////////////////////////////#}
 
             <!-- Product Tabs -->
             <div class="mt-8 bg-zinc-700 rounded-2xl shadow-lg p-4">
@@ -378,16 +460,19 @@
                         {% for review in product_reviews %}
                             <div class="review-item bg-zinc-700 p-4 mb-4 rounded-lg shadow-md">
                                 <div class="flex items-start mb-4">
-                                    <img src="https://via.placeholder.com/40" alt="User Avatar"
+                                    <img src="{% if review.user.profile_picture %}{{ review.user.profile_picture.url }}{% else %}{% static 'img/static/default-profile.jpg' %}{% endif %}" alt="عکس پروفایل کاربر"
+                                         id="profile-picture"
                                          class="w-10 h-10 rounded-full">
                                     <div class="ml-4 flex-1">
-                                        <h6 class="font-semibold">{{ review.author }}</h6>
+                                        <h6 class="font-semibold">{{ review.user.fullname|default:review.user.phone }}</h6>
                                         <p class="text-zinc-300">{{ review.comment }}</p>
                                         {% if review.replies.exists %}
                                             <div class="ml-6 mt-4">
                                                 {% for reply in review.replies.all %}
                                                     <div class="review-item bg-zinc-600 p-2 rounded-lg mb-2">
-                                                        <p><strong>{{ reply.author }}:</strong> {{ reply.comment }}</p>
+                                                        <p><strong>{{ reply.user.fullname|default:reply.user.phone }}
+                                                            :</strong> </p>
+                                                    <span>{{ reply.comment }}</span>
                                                     </div>
                                                 {% endfor %}
                                             </div>
@@ -413,9 +498,11 @@
                             </div>
                         {% empty %}
                             <div>
-                                <p>نظری برای محصول ثبت نشده (شما می توانید اولین نفر باشید ^_^)</p>
+                                <p>نظری برای محصول ثبت نشده (شما می‌توانید اولین نفر باشید ^_^)</p>
                             </div>
                         {% endfor %}
+
+
                     </div>
 
                     <div id="sub-content-reviews-my" class="sub-tab-content scrollable-section">
@@ -477,75 +564,29 @@
             {#        /////////////////////////////////#}
             <div class="mt-8 bg-zinc-700 rounded-2xl shadow-lg p-4">
                 <h4 class="text-2xl font-semibold mb-4">پرسش‌های متداول</h4>
-                <div class="bg-zinc-800 p-4 rounded-lg mb-4">
-                    <button class="faq-question flex justify-between items-center w-full p-4 text-left text-white bg-zinc-700 rounded-lg focus:outline-none">
-                        <span>چگونه می‌توانم سفارشم را پیگیری کنم؟</span>
-                        <svg class="w-6 h-6 text-white transform transition-transform duration-300" fill="none"
-                             stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div class="faq-answer mt-2 hidden p-4 bg-zinc-600 rounded-lg">
-                        <p>برای پیگیری سفارش خود می‌توانید از بخش پیگیری سفارش‌ها در پروفایل کاربری خود استفاده
-                            کنید.</p>
+                {% for faq in faqs %}
+                    <div class="bg-zinc-800 p-4 rounded-lg mb-4">
+                        <button class=
+                                        "faq-question flex justify-between items-center w-full p-4 text-left text-white bg-zinc-700 rounded-lg focus:outline-none"
+                        >
+                            <span>{{ faq.question }}</span>
+                            <svg class=
+                                         "w-6 h-6 text-white transform transition-transform duration-300"
+                                 fill="none"
+                                 stroke="currentColor" viewBox="0 0 24 24" xmlns=
+                                         "http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class=
+                                     "faq-answer mt-2 hidden p-4 bg-zinc-600 rounded-lg">
+                            <p>{{ faq.answer }}</p>
+                        </div>
                     </div>
-                </div>
-                <div class="bg-zinc-800 p-4 rounded-lg mb-4">
-                    <button class="faq-question flex justify-between items-center w-full p-4 text-left text-white bg-zinc-700 rounded-lg focus:outline-none">
-                        <span>آیا امکان بازگشت محصول وجود دارد؟</span>
-                        <svg class="w-6 h-6 text-white transform transition-transform duration-300" fill="none"
-                             stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div class="faq-answer mt-2 hidden p-4 bg-zinc-600 rounded-lg">
-                        <p>بله، شما می‌توانید محصول خود را تا ۷ روز پس از دریافت بازگردانید، مشروط بر اینکه محصول در
-                            وضعیت اولیه خود باشد.</p>
-                    </div>
-                </div>
-                <div class="bg-zinc-800 p-4 rounded-lg mb-4">
-                    <button class="faq-question flex justify-between items-center w-full p-4 text-left text-white bg-zinc-700 rounded-lg focus:outline-none">
-                        <span>چگونه می‌توانم تخفیف بگیرم؟</span>
-                        <svg class="w-6 h-6 text-white transform transition-transform duration-300" fill="none"
-                             stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div class="faq-answer mt-2 hidden p-4 bg-zinc-600 rounded-lg">
-                        <p>برای دریافت تخفیف می‌توانید از کدهای تخفیف موجود در سایت استفاده کنید یا به عضویت خبرنامه ما
-                            درآیید تا از تخفیف‌های ویژه باخبر شوید.</p>
-                    </div>
-                </div>
-                <div class="bg-zinc-800 p-4 rounded-lg mb-4">
-                    <button class="faq-question flex justify-between items-center w-full p-4 text-left text-white bg-zinc-700 rounded-lg focus:outline-none">
-                        <span>آیا ارسال محصولات رایگان است؟</span>
-                        <svg class="w-6 h-6 text-white transform transition-transform duration-300" fill="none"
-                             stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div class="faq-answer mt-2 hidden p-4 bg-zinc-600 rounded-lg">
-                        <p>بله، برای سفارش‌های بالای ۲۰۰ هزار تومان ارسال رایگان می‌باشد.</p>
-                    </div>
-                </div>
-                <div class="bg-zinc-800 p-4 rounded-lg mb-4">
-                    <button class="faq-question flex justify-between items-center w-full p-4 text-left text-white bg-zinc-700 rounded-lg focus:outline-none">
-                        <span>چگونه می‌توانم با پشتیبانی تماس بگیرم؟</span>
-                        <svg class="w-6 h-6 text-white transform transition-transform duration-300" fill="none"
-                             stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div class="faq-answer mt-2 hidden p-4 bg-zinc-600 rounded-lg">
-                        <p>برای تماس با پشتیبانی می‌توانید از بخش تماس با ما در سایت استفاده کنید یا با شماره‌های موجود
-                            در آن صفحه تماس بگیرید.</p>
-                    </div>
-                </div>
+
+                {% endfor %}
             </div>
 
         </div>
@@ -636,127 +677,146 @@
             // Initialize Tabs
             activateTab('tab-specs');
 
-            // Swiper Initialization
-            const swiper = new Swiper(".swiper", {
-                effect: "cube",
-                grabCursor: true,
-                loop: true,
-                speed: 1000,
-                cubeEffect: {
-                    shadow: false,
-                    slideShadows: true,
-                    shadowOffset: 10,
-                    shadowScale: 0.94,
-                },
-                autoplay: {
-                    delay: 2600,
-                    pauseOnMouseEnter: true,
-                },
-                navigation: {
-                    nextEl: '#next',
-                    prevEl: '#prev',
-                },
-            });
-
-            // tsParticles Initialization
-            tsParticles.load("tsparticles", {
-                fpsLimit: 60,
-                backgroundMode: {
-                    enable: true,
-                    zIndex: -1,
-                },
-                particles: {
-                    number: {
-                        value: 30,
-                        density: {
-                            enable: true,
-                            area: 800,
-                        },
-                    },
-                    color: {
-                        value: ["#3998D0", "#2EB6AF", "#A9BD33", "#FEC73B", "#F89930", "#F45623", "#D62E32"],
-                    },
-                    destroy: {
-                        mode: "split",
-                        split: {
-                            count: 1,
-                            factor: {
-                                value: 5,
-                                random: {
-                                    enable: true,
-                                    minimumValue: 4,
-                                },
-                            },
-                            rate: {
-                                value: 10,
-                                random: {
-                                    enable: true,
-                                    minimumValue: 5,
-                                },
-                            },
-                            particles: {
-                                collisions: {
-                                    enable: false,
-                                },
-                                destroy: {
-                                    mode: "none",
-                                },
-                                life: {
-                                    count: 1,
-                                    duration: {
-                                        value: 1,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    shape: {
-                        type: "circle",
-                        stroke: {
-                            width: 0,
-                            color: "#000000",
-                        },
-                        polygon: {
-                            sides: 5,
-                        },
-                    },
-                    opacity: {
-                        value: 1,
-                        animation: {
-                            enable: false,
-                            speed: 1,
-                            minimumValue: 0.1,
-                            sync: false,
-                        },
-                    },
-                    size: {
-                        value: 8,
-                        random: {
-                            enable: true,
-                            minimumValue: 4,
-                        },
-                        animation: {
-                            enable: false,
-                            speed: 40,
-                            minimumValue: 0.1,
-                            sync: false,
-                        },
-                    },
-                    collisions: {
-                        enable: true,
-                        mode: "destroy",
-                    },
-                    move: {
-                        enable: true,
-                        speed: 7,
-                        direction: "none",
-                        out_mode: "out",
-                    },
-                },
-                detectRetina: true,
-            })
         });
     </script>
+    <script>
+        var swiper_new = new Swiper(".swiper", {
+            effect: "cube",
+            grabCursor: true,
+            loop: true,
+            speed: 1000,
+            cubeEffect: {
+                shadow: false,
+                slideShadows: true,
+                shadowOffset: 10,
+                shadowScale: 0.94,
+            },
+            autoplay: {
+                delay: 2600,
+                pauseOnMouseEnter: true,
+            },
+        });
+
+        tsParticles.load("tsparticles", {
+            fpsLimit: 60,
+            backgroundMode: {
+                enable: true,
+                zIndex: -1,
+            },
+            particles: {
+                number: {
+                    value: 30,
+                    density: {
+                        enable: true,
+                        area: 800,
+                    },
+                },
+                color: {
+                    value: [
+                        "#3998D0",
+                        "#2EB6AF",
+                        "#A9BD33",
+                        "#FEC73B",
+                        "#F89930",
+                        "#F45623",
+                        "#D62E32",
+                    ],
+                },
+                destroy: {
+                    mode: "split",
+                    split: {
+                        count: 1,
+                        factor: {
+                            value: 5,
+                            random: {
+                                enable: true,
+                                minimumValue: 4,
+                            },
+                        },
+                        rate: {
+                            value: 10,
+                            random: {
+                                enable: true,
+                                minimumValue: 5,
+                            },
+                        },
+                        particles: {
+                            collisions: {
+                                enable: false,
+                            },
+                            destroy: {
+                                mode: "none",
+                            },
+                            life: {
+                                count: 1,
+                                duration: {
+                                    value: 1,
+                                },
+                            },
+                        },
+                    },
+                },
+                shape: {
+                    type: "circle",
+                    stroke: {
+                        width: 0,
+                        color: "#000000",
+                    },
+                    polygon: {
+                        sides: 5,
+                    },
+                },
+                opacity: {
+                    value: 1,
+                    random: false,
+                    animation: {
+                        enable: false,
+                        speed: 1,
+                        minimumValue: 0.1,
+                        sync: false,
+                    },
+                },
+                size: {
+                    value: 8,
+                    random: {
+                        enable: true,
+                        minimumValue: 4,
+                    },
+                    animation: {
+                        enable: false,
+                        speed: 40,
+                        minimumValue: 0.1,
+                        sync: false,
+                    },
+                },
+                collisions: {
+                    enable: true,
+                    mode: "destroy",
+                },
+                move: {
+                    enable: true,
+                    speed: 7,
+                    direction: "none",
+                    random: false,
+                    straight: false,
+                    out_mode: "out",
+                    attract: {
+                        enable: false,
+                        rotateX: 600,
+                        rotateY: 1200,
+                    },
+                },
+            },
+            detectRetina: true,
+        });
+
+
+    </script>
+    {#    <script src='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js'></script>#}
+    {##}
+    {#    <script src='https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js'></script>#}
+    <script src="{% static 'script/product-swiper.js' %}"></script>
+
 {% endblock %}
 
 

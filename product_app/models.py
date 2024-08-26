@@ -76,9 +76,29 @@ class ProductFeature(models.Model):
         verbose_name_plural = 'ویژگی‌های محصول'
 
 
+# class ProductReview(models.Model):
+#     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE, verbose_name='محصول')
+#     author_phone = models.CharField(max_length=255, verbose_name='نویسنده',null=True,blank=True)
+#     author_name = models.CharField(max_length=255, verbose_name='اسم نویسنده', null=True,blank=True)
+#     rating = models.FloatField(verbose_name='امتیاز', null=True, blank=True)
+#     comment = models.TextField(verbose_name='نظر')
+#     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد')
+#     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE,
+#                                verbose_name='پاسخ به')
+#
+#
+#
+#     def __str__(self):
+#         return f"نظر {self.author_phone} بر روی {self.product.name}"
+#
+#     class Meta:
+#         verbose_name = 'نظر محصول'
+#         verbose_name_plural = 'نظرات محصول'
+#         ordering = ['-created_at']
+
 class ProductReview(models.Model):
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE, verbose_name='محصول')
-    author = models.CharField(max_length=255, verbose_name='نویسنده')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='کاربر', related_name='reviews')
     rating = models.FloatField(verbose_name='امتیاز', null=True, blank=True)
     comment = models.TextField(verbose_name='نظر')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد')
@@ -86,7 +106,7 @@ class ProductReview(models.Model):
                                verbose_name='پاسخ به')
 
     def __str__(self):
-        return f"نظر {self.author} بر روی {self.product.name}"
+        return f"نظر {self.user.phone} بر روی {self.product.name}"
 
     class Meta:
         verbose_name = 'نظر محصول'

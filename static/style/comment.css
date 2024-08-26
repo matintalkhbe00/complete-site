@@ -76,7 +76,7 @@
 
 
 /* استایل برای رسانه‌های متوسط و بزرگ */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .mb-bmd-15 {
         margin-bottom: 60px; /* معادل 2 واحد در Tailwind */
     }

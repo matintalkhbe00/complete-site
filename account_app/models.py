@@ -78,15 +78,15 @@ class Address(models.Model):
     last_name = models.CharField(max_length=50)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=12, validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")])
-    address = models.CharField(max_length=300)
-    postal_code = models.CharField(max_length=50)
+    address = models.TextField()
+    postal_code = models.TextField()
 
     def __str__(self):
         return self.phone
 
 class Otp(models.Model):
-    token = models.CharField(max_length=1000, unique=True)
-    phone = models.CharField(max_length=12, unique=True, validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")])
+    token = models.CharField(max_length=50, unique=True)
+    phone = models.CharField(max_length=15, unique=True, validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")])
     code = models.SmallIntegerField()
     expiration_date = models.DateTimeField(default=timezone.now)
 

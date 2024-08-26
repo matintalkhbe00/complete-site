@@ -23,7 +23,6 @@ class CustomLoginForm(AuthenticationForm):
     )
 
 
-
 class UserCreationForm(forms.ModelForm):
     fullname = forms.CharField(
         max_length=100,
@@ -98,7 +97,8 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = "__all__"
+        # fields = "__all__"
+        exclude = ['phone']
 
 
 class ContactForm(forms.ModelForm):
@@ -121,7 +121,8 @@ class ContactForm(forms.ModelForm):
 class PasswordChangeCustomForm(PasswordChangeForm):
     old_password = forms.CharField(label='رمز عبور قبلی', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     new_password1 = forms.CharField(label='رمز عبور جدید', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    new_password2 = forms.CharField(label='تکرار رمز عبور جدید', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    new_password2 = forms.CharField(label='تکرار رمز عبور جدید',
+                                    widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
 
 class ProfileEditForm(forms.ModelForm):
@@ -150,9 +151,6 @@ class ProfileEditForm(forms.ModelForm):
         return email
 
 
-
-
-
 class PhoneNumberForm(forms.Form):
     phone_number = forms.CharField(
         max_length=15,
@@ -166,7 +164,6 @@ class PhoneNumberForm(forms.Form):
     )
 
 
-
 class VerifyCodeForm(forms.Form):
     code = forms.IntegerField(
         label='کد تایید',
@@ -177,8 +174,11 @@ class VerifyCodeForm(forms.Form):
 
 
 class VerifyCode_signupForm(forms.Form):
-    code = forms.CharField(max_length=6, label='کد تایید')
+    code = forms.CharField(max_length=6, label='کد تایید', widget=forms.TextInput(attrs={
+        'placeholder': 'لطفا کد تایید را وارد کنید',
+        'class': 'phone-input',
 
+    }))
 
 
 class PasswordResetForm(forms.Form):

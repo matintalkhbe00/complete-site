@@ -14,7 +14,8 @@
             class="nav fixed min-h-screen top-0 bottom-0 -right-64 w-64 pt-3 px-4 bg-white dark:bg-zinc-700 z-20 transition-all overflow-y-auto">
         <!-- Header Of Menu  -->
         <div class="flex justify-between items-center pb-5 border-b border-b-gray-100 dark:border-b-white/10">
-            <div class="flex gap-3.5">
+            <a href="{% url 'home_app:home' %}">
+                <div class="flex gap-3.5">
                 <svg class="h-10 w-[41px] text-orange-300">
                     <use href="#logo"></use>
                 </svg>
@@ -22,6 +23,7 @@
                     <use href="#logo-type"></use>
                 </svg>
             </div>
+            </a>
 
             <div class="nav-close-btn">
                 <svg class="h-5 w-5 text-zinc-600 dark:text-white">
@@ -33,7 +35,7 @@
 
         <div>
             <ul class="child:pr-2.5 space-y-6 text-zinc-600 dark:text-white">
-                <li class="mt-6 flex gap-2">
+                <li class="mt-6 flex gap-2 {% if request.resolver_match.url_name == 'home' %}text-orange-200 {% endif %}">
                     <svg class="w-5 h-5">
                         <use xlink:href="#home"></use>
                     </svg>
@@ -41,7 +43,7 @@
                 </li>
                 <!-- Sidebar Menu  -->
                 <li>
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center justify-between mb-3 {% if request.resolver_match.url_name == 'product_list' %}text-orange-200 {% endif %}">
                         <a href="{% url 'product_app:product_list' %}" class="flex gap-2">
                             <svg class="w-5 h-5">
                                 <use xlink:href="#shopping-bag"></use>
@@ -56,19 +58,19 @@
                     </div>
                 </li>
 
-                <li class="flex gap-2">
+                <li class="flex gap-2 {% if request.resolver_match.url_name == 'about-us' %}text-orange-200 {% endif %}">
                     <svg class="w-5 h-5">
                         <use xlink:href="#briefcase"></use>
                     </svg>
                     <a href="{% url 'home_app:about-us' %}">درباره ما</a>
                 </li>
-                <li class="flex gap-2">
+                <li class="flex gap-2 ">
                     <svg class="w-5 h-5">
                         <use xlink:href="#document-text"></use>
                     </svg>
                     <a href="#">بلاگ</a>
                 </li>
-                <li class="flex gap-2">
+                <li class="flex gap-2 {% if request.resolver_match.url_name == 'contact_form_submit' %}text-orange-200 {% endif %}">
                     <svg class="w-5 h-5">
                         <use xlink:href="#phone-arrow"></use>
                     </svg>
@@ -79,7 +81,7 @@
         <!-- Footer Of Menu  -->
         <div
                 class="border-t flex flex-col gap-y-6 items-start border-t-gray-100 dark:border-t-white/10 text-orange-300 py-8 px-2.5 mt-8">
-            <div class="flex gap-x-2">
+            <div class="flex gap-x-2 ">
                 <svg class="h-5 w-5">
                     <use href="#arrow-left-end-on-rectangle"></use>
                 </svg>
@@ -115,9 +117,11 @@
     </div>
     <!-- Logo Type  -->
     <div>
-        <svg class="h-10 w-[100px] text-orange-300">
+        <a href="{% url 'home_app:home' %}">
+            <svg class="h-10 w-[100px] text-orange-300">
             <use href="#logo-type"></use>
         </svg>
+        </a>
     </div>
 
     <!-- Cart Icon  -->

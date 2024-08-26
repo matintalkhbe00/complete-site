@@ -193,8 +193,10 @@
     <!-- بخش جستجو و فیلتر -->
     <section class="container" style="">
         <!-- فیلتر و جستجو -->
+
           <div class="filters">
             <form method="GET" action="{% url 'product_app:product_list' %}" class="filters-form">
+                <br>
                 <div class="filter-group">
                     <label class="filter-label" for="search">جستجو:</label>
                     <input type="text" id="search" name="search" class="filter-input"
@@ -211,6 +213,8 @@
                            value="{{ request.GET.max_price }}">
                 </div>
                 <button type="submit" class="filter-button">اعمال فیلتر</button>
+                <br>
+                <p>در جریان باشید که لازم نیست همه فیلد ها پر بشه :)</p>
             </form>
         </div>
 
@@ -222,13 +226,15 @@
                 <div>
                     <!-- Images and discount -->
                     <div class="relative mb-2 md:mb-5">
-                        {% if product.images.exists %}
+                        <a href="{% url 'product_app:product_detail' product.id %}">
+                            {% if product.images.exists %}
                             <img src="{{ product.images.first.image.url }}" class="md:w-auto mx-auto" loading="lazy"
                                  alt="{{ product.images.first.alt_text }}">
                         {% else %}
                             <img src="{% static 'img/products/productDefault.png' %}" class="md:w-auto mx-auto"
                                  loading="lazy" alt="product img not loaded">
                         {% endif %}
+                        </a>
                         {% if product.discount_percentage %}
                             {% if product.status == "in_stock" %}
 

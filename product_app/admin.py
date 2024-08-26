@@ -30,8 +30,8 @@ class ProductFeatureAdmin(admin.ModelAdmin):
     search_fields = ('name', 'value')
 
 class ProductReviewAdmin(admin.ModelAdmin):
-    list_display = ('product', 'author', 'rating', 'comment', 'created_at')
-    search_fields = ('author', 'comment')
+    list_display = ('product', 'user', 'rating', 'comment', 'created_at')
+    search_fields = ('author_phone', 'comment')
     list_filter = ('created_at', 'rating')
 
 class DiscountCodeAdmin(admin.ModelAdmin):

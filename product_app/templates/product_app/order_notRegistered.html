@@ -505,12 +505,22 @@
             }
         }
 
+        @media (min-width: 765px) {
+
+            #main {
+                margin-top: 150px;
+
+            }
+        }
+
         @media (min-width: 640px) {
             .order-actions {
                 position: absolute;
                 left: 20px; /* Adjust as needed */
                 bottom: 20px; /* Fixed at the bottom */
-            }}
+            }
+
+        }
 
     </style>
 
@@ -520,7 +530,7 @@
 {% endblock %}
 
 {% block main %}
-    <main class="py-[150px] font-DanaRegular container">
+    <main id="main" class=" font-DanaRegular container">
         <div class="order-container">
             <div class="order-header">
                 <h1> جزئیات سفارشات</h1>
@@ -564,9 +574,11 @@
                                                     حذف
                                                 </button>
                                             </form>
-                                            <img src="{{ item.product.images.first.image.url }}"
-                                                 alt="{{ item.product.name }}" class=
-                                                         "order-item-image">
+                                            <a href="{% url 'product_app:product_detail' item.product.id %}">
+                                                <img src="{{ item.product.images.first.image.url }}"
+                                                     alt="{{ item.product.name }}" class=
+                                                             "order-item-image">
+                                            </a>
                                             <div class="order-item-details">
                                                 <a href="
                                                                     {% url 'product_app:product_detail' item.product.id %}
@@ -575,7 +587,8 @@
                                                       action="{% url 'product_app:update_order_item' %}"
                                                 >{% csrf_token %}
                                                     <p><strong> تعداد:</strong>
-                                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" required class="quantity-input">
+                                                        <input type="number" name="quantity" value="{{ item.quantity }}"
+                                                               min="1" required class="quantity-input">
                                                         <input type="hidden" name="item_id" value="{{ item.id }}">
                                                         <button type="submit"> به‌روزرسانی</button>
                                                     </p>
@@ -754,22 +767,18 @@
                         answer.classList.remove('show');
                         svg.classList.remove('rotate-180');
                     } else {
-                        document.querySelectorAll('.faq-answer').forEach(answer = > answer.classList.remove('show')
-                    )
-                        ;
-
-                        document.querySelectorAll('.faq-question svg').forEach(svg = > svg.classList.remove('rotate-180')
-                    )
-                        ;
+                        document.querySelectorAll('.faq-answer').forEach(answer => answer.classList.remove('show'));
+                        document.querySelectorAll('.faq-question svg').forEach(svg => svg.classList.remove('rotate-180'));
 
                         answer.classList.add('show');
-
                         svg.classList.add('rotate-180');
                     }
                 });
             });
         });
     </script>
+
+
     <script>
         // script.js
         document.addEventListener('DOMContentLoaded', function () {
