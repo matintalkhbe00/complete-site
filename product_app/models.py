@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from account_app.models import Address
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 User = get_user_model()
 
 class Product(models.Model):
@@ -16,10 +17,10 @@ class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام محصول')
     description = models.TextField(verbose_name='توضیحات محصول')
     price = models.DecimalField(max_digits=10, decimal_places=0, verbose_name='قیمت')
-    discount_percentage = models.DecimalField(max_digits=2, decimal_places=0, blank=True, null=True,
-                                              verbose_name='درصد تخفیف')
+    discount_percentage = models.DecimalField(max_digits=2, decimal_places=0, blank=True, null=True, verbose_name='درصد تخفیف')
     status = models.CharField(max_length=20, choices=PRODUCT_STATUS_CHOICES, default='in_stock', verbose_name='وضعیت')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='تاریخ ایجاد')
+
     def get_final_price(self):
         if self.discount_percentage and self.discount_percentage > 0:
             discount_amount = (self.price * self.discount_percentage) / 100
@@ -55,12 +56,16 @@ class Product(models.Model):
 
 
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='product_images/')
-    alt_text = models.CharField(max_length=255, blank=True, null=True)
+    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE, verbose_name='محصول')
+    image = models.ImageField(upload_to='product_images/', verbose_name='تصویر محصول')
+    alt_text = models.CharField(max_length=255, blank=True, null=True, verbose_name='متن جایگزین')
 
     def __str__(self):
-        return f"Image for {self.product.name}"
+        return f"تصویر {self.product.name}"
+
+    class Meta:
+        verbose_name = 'تصویر محصول'
+        verbose_name_plural = 'تصاویر محصول'
 
 
 class ProductFeature(models.Model):
@@ -76,34 +81,13 @@ class ProductFeature(models.Model):
         verbose_name_plural = 'ویژگی‌های محصول'
 
 
-# class ProductReview(models.Model):
-#     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE, verbose_name='محصول')
-#     author_phone = models.CharField(max_length=255, verbose_name='نویسنده',null=True,blank=True)
-#     author_name = models.CharField(max_length=255, verbose_name='اسم نویسنده', null=True,blank=True)
-#     rating = models.FloatField(verbose_name='امتیاز', null=True, blank=True)
-#     comment = models.TextField(verbose_name='نظر')
-#     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد')
-#     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE,
-#                                verbose_name='پاسخ به')
-#
-#
-#
-#     def __str__(self):
-#         return f"نظر {self.author_phone} بر روی {self.product.name}"
-#
-#     class Meta:
-#         verbose_name = 'نظر محصول'
-#         verbose_name_plural = 'نظرات محصول'
-#         ordering = ['-created_at']
-
 class ProductReview(models.Model):
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE, verbose_name='محصول')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='کاربر', related_name='reviews')
     rating = models.FloatField(verbose_name='امتیاز', null=True, blank=True)
     comment = models.TextField(verbose_name='نظر')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد')
-    parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE,
-                               verbose_name='پاسخ به')
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE, verbose_name='پاسخ به')
 
     def __str__(self):
         return f"نظر {self.user.phone} بر روی {self.product.name}"
@@ -115,11 +99,11 @@ class ProductReview(models.Model):
 
 
 class DiscountCode(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-    discount = models.SmallIntegerField(default=0)
-    quantity = models.SmallIntegerField(default=1)
-    start_date = models.DateTimeField(null=True, blank=True)
-    end_date = models.DateTimeField(null=True, blank=True)
+    name = models.CharField(max_length=50, unique=True, verbose_name='نام کد تخفیف')
+    discount = models.SmallIntegerField(default=0, verbose_name='مقدار تخفیف')
+    quantity = models.SmallIntegerField(default=1, verbose_name='تعداد')
+    start_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ شروع')
+    end_date = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ پایان')
 
     def is_valid(self):
         now = timezone.now()
@@ -135,9 +119,12 @@ class DiscountCode(models.Model):
     def __str__(self):
         return self.name
 
-
+    class Meta:
+        verbose_name = 'کد تخفیف'
+        verbose_name_plural = 'کدهای تخفیف'
 
 # /////////////////////////////////////////////////////////////////////////////
+
 class Order(models.Model):
     ORDER_STATUS_CHOICES = [
         ('notRegistered','تایید نشده'),
@@ -147,22 +134,20 @@ class Order(models.Model):
         ('cancelled', 'لغو شده'),
     ]
 
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='کاربر')
     address = models.ForeignKey(Address, on_delete=models.CASCADE, null=True, blank=True, verbose_name='آدرس')
-    total_price = models.IntegerField(default=0)
-    original_price = models.IntegerField(default=0)
+    total_price = models.IntegerField(default=0, verbose_name='قیمت نهایی')
+    original_price = models.IntegerField(default=0, verbose_name='قیمت اولیه')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاریخ به‌روزرسانی')
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='notRegistered', verbose_name='وضعیت')
-    discount_code = models.ForeignKey(DiscountCode, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
+    discount_code = models.ForeignKey(DiscountCode, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders', verbose_name='کد تخفیف')
 
     def __str__(self):
-        return f'Order {self.id} by {self.user.fullname}'
+        return f'سفارش {self.id} توسط {self.user.fullname}'
 
     def save(self, *args, **kwargs):
         if self.pk:
-            # فقط هنگام به‌روزرسانی قیمت‌ها به‌روز می‌شود
             self.original_price = sum(item.get_total_price() for item in self.items.all())
             self.total_price = self.get_discounted_total_price()
         super().save(*args, **kwargs)
@@ -185,11 +170,9 @@ class Order(models.Model):
             discount_amount = (self.original_price * discount_percentage) / 100
             return discount_amount
 
-
     class Meta:
         verbose_name = 'سفارش'
         verbose_name_plural = 'سفارشات'
-
 
 
 class OrderItem(models.Model):
@@ -204,23 +187,19 @@ class OrderItem(models.Model):
 
     def get_discounted_price(self):
         if self.product.discount_percentage:
-            return self.product.price * self.product.discount_percentage /100
-
-
+            return self.product.price * self.product.discount_percentage / 100
 
     class Meta:
-        verbose_name = 'ایتم سفرش'
-        verbose_name_plural = 'ایتم های سفارش'
+        verbose_name = 'آیتم سفارش'
+        verbose_name_plural = 'آیتم‌های سفارش'
 
     def __str__(self):
-        return f'{self.quantity} x {self.product.name} in {self.order.id}'
+        return f'{self.quantity} x {self.product.name} در سفارش {self.order.id}'
 
 @receiver(post_save, sender=OrderItem)
 def update_order_total_price(sender, instance, **kwargs):
     order = instance.order
     order.update_total_price()
-
-
 
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True, verbose_name='نام دسته‌بندی')
@@ -231,6 +210,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'دسته‌بندی'
         verbose_name_plural = 'دسته‌بندی‌ها'
+
 
 class SubCategory(models.Model):
     category = models.ForeignKey(Category, related_name='subcategories', on_delete=models.CASCADE, verbose_name='دسته‌بندی اصلی')
@@ -243,15 +223,13 @@ class SubCategory(models.Model):
         verbose_name = 'زیر دسته‌بندی'
         verbose_name_plural = 'زیر دسته‌بندی‌ها'
 
-class SubShop(models.Model):
-    categories = models.ManyToManyField(Category, related_name='subshops', verbose_name='دسته‌بندی‌های فروشگاه')
 
-    def __str__(self):
-        # نمایش نام‌های دسته‌بندی‌ها به صورت لیست در متد __str__
-        return f"فروشگاه با دسته‌بندی‌ها: {', '.join(str(cat) for cat in self.categories.all())}"
-
-    class Meta:
-        verbose_name = 'فروشگاه فرعی'
-        verbose_name_plural = 'فروشگاه‌های فرعی'
-
-
+# class SubShop(models.Model):
+#     categories = models.ManyToManyField(Category, related_name='subshops', verbose_name='دسته‌بندی‌های فروشگاه')
+#
+#     def __str__(self):
+#         return f"فروشگاه با دسته‌بندی‌ها: {', '.join(str(cat) for cat in self.categories.all())}"
+#
+#     class Meta:
+#         verbose_name = 'فروشگاه فرعی'
+#         verbose_name_plural = 'فروشگاه‌های فرعی'

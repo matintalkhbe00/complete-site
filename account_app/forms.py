@@ -127,28 +127,24 @@ class PasswordChangeCustomForm(PasswordChangeForm):
 
 class ProfileEditForm(forms.ModelForm):
     email = forms.EmailField(
+        required=False,  # ایمیل اختیاری شده است
         validators=[EmailValidator()],
         error_messages={
             'invalid': 'ایمیل وارد شده معتبر نمی‌باشد.',
-            'unique': 'این ایمیل قبلاً ثبت شده است.'
         }
     )
 
     class Meta:
         model = User
-        fields = ['fullname', 'phone', 'email']
-
-    def clean_phone(self):
-        phone = self.cleaned_data.get('phone')
-        if User.objects.exclude(pk=self.instance.pk).filter(phone=phone).exists():
-            raise ValidationError('این شماره تلفن قبلاً ثبت شده است.')
-        return phone
+        fields = ['fullname', 'email']
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
+        # بررسی اینکه اگر ایمیل پر شده است، بررسی تکراری بودن آن را انجام دهد
+        if email and User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
             raise ValidationError('این ایمیل قبلاً ثبت شده است.')
         return email
+
 
 
 class PhoneNumberForm(forms.Form):

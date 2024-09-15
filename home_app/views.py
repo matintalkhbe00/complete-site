@@ -85,3 +85,6 @@ class GuaranteeView(TemplateView):
 
 class AboutUsView(TemplateView):
     template_name = 'home_app/about-us.html'
+
+class RolesView(TemplateView):
+    template_name = 'home_app/roles.html'

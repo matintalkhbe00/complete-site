@@ -50,7 +50,7 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
 
 
-from .models import Category, SubCategory,SubShop
+from .models import Category, SubCategory
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -67,12 +67,12 @@ class SubCategoryAdmin(admin.ModelAdmin):
     # اگر نیاز دارید که بتوانید در فرم ایجاد/ویرایش زیر دسته‌بندی‌ها، محصولات را انتخاب کنید
     filter_horizontal = ('products',)  # برای انتخاب چندین محصول از بین لیست
 
-@admin.register(SubShop)
-class SubShopAdmin(admin.ModelAdmin):
-    list_display = ('__str__',)  # نمایش نمای متنی مدل در لیست
-    filter_horizontal = ('categories',)  # برای انتخاب چندین دسته‌بندی به صورت انتخابی
-    search_fields = ('categories__name',)  # امکان جستجو بر اساس نام دسته‌بندی‌ها
-    ordering = ('id',)  # ترتیب نمایش بر اساس شناسه
+# @admin.register(SubShop)
+# class SubShopAdmin(admin.ModelAdmin):
+#     list_display = ('__str__',)  # نمایش نمای متنی مدل در لیست
+#     filter_horizontal = ('categories',)  # برای انتخاب چندین دسته‌بندی به صورت انتخابی
+#     search_fields = ('categories__name',)  # امکان جستجو بر اساس نام دسته‌بندی‌ها
+#     ordering = ('id',)  # ترتیب نمایش بر اساس شناسه
 
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductImage, ProductImageAdmin)

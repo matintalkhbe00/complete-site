@@ -252,30 +252,21 @@ class EditProfileView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['profile_form'] = ProfileEditForm(instance=self.request.user)
-        context['password_form'] = PasswordChangeCustomForm(user=self.request.user)
+
         return context
 
     def post(self, request, *args, **kwargs):
         profile_form = ProfileEditForm(request.POST, instance=request.user)
-        password_form = PasswordChangeCustomForm(user=request.user, data=request.POST)
-        print('change')
-        if profile_form.is_valid() and password_form.is_valid():
-            print('pass user')
-            profile_form.save()
-            user = password_form.save()
-            update_session_auth_hash(request, user)  # مهم برای عدم خروج کاربر پس از تغییر رمز
-            return redirect('account_app:profile')
 
-        elif profile_form.is_valid():
+        print('change')
+
+        if profile_form.is_valid():
             print('user')
             profile_form.save()
             return redirect('account_app:profile')
-        elif password_form.is_valid():
-            user = password_form.save()
-            update_session_auth_hash(request, user)  # مهم برای عدم خروج کاربر پس از تغییر رمز
-            return redirect('account_app:profile')
 
-        return self.render_to_response(self.get_context_data(profile_form=profile_form, password_form=password_form))
+
+        return self.render_to_response(self.get_context_data(profile_form=profile_form))
 
 # ///////////////////////////////////////////
 

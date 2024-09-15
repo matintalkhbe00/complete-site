@@ -3,6 +3,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.core.validators import RegexValidator
 from django.utils import timezone
 
+#//////////////////////////////////
+# UserManager
+#//////////////////////////////////
 class UserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
         """
@@ -26,11 +29,13 @@ class UserManager(BaseUserManager):
 
         return self.create_user(phone, password, **extra_fields)
 
+#//////////////////////////////////
+# User Model
+#//////////////////////////////////
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         verbose_name="ایمیل",
         max_length=255,
-
         null=True,
         blank=True
     )
@@ -46,11 +51,28 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name="شماره تلفن",
         validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")]
     )
-    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True,verbose_name="عکس پروفایل")
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False, verbose_name="ادمین")
-    is_staff = models.BooleanField(default=False, verbose_name="عضو کادر")
-    is_superuser = models.BooleanField(default=False, verbose_name="سوپر کاربر")
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        null=True,
+        blank=True,
+        verbose_name="عکس پروفایل"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="فعال"
+    )
+    is_admin = models.BooleanField(
+        default=False,
+        verbose_name="ادمین"
+    )
+    is_staff = models.BooleanField(
+        default=False,
+        verbose_name="عضو کادر"
+    )
+    is_superuser = models.BooleanField(
+        default=False,
+        verbose_name="سوپر کاربر"
+    )
 
     objects = UserManager()
 
@@ -72,23 +94,73 @@ class User(AbstractBaseUser, PermissionsMixin):
         "Does the user have permissions to view the app `app_label`?"
         return self.is_admin
 
+    def get_orders(self):
+        return self.orders.all()
+
+#//////////////////////////////////
+# Address Model
+#//////////////////////////////////
 class Address(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=12, validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")])
-    address = models.TextField()
-    postal_code = models.TextField()
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='addresses',
+        verbose_name="کاربر"
+    )
+    first_name = models.CharField(
+        max_length=50,
+        verbose_name="نام"
+    )
+    last_name = models.CharField(
+        max_length=50,
+        verbose_name="نام خانوادگی"
+    )
+    email = models.EmailField(
+        blank=True,
+        null=True,
+        verbose_name="ایمیل"
+    )
+    phone = models.CharField(
+        max_length=12,
+        validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")],
+        verbose_name="شماره تلفن"
+    )
+    address = models.TextField(
+        verbose_name="آدرس"
+    )
+    postal_code = models.TextField(
+        verbose_name="کد پستی"
+    )
 
     def __str__(self):
         return self.phone
 
+    class Meta:
+        verbose_name = "آدرس"
+        verbose_name_plural = "آدرس‌ها"
+
+#//////////////////////////////////
+# Otp Model
+#//////////////////////////////////
 class Otp(models.Model):
-    token = models.CharField(max_length=50, unique=True)
-    phone = models.CharField(max_length=15, unique=True, validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")])
-    code = models.SmallIntegerField()
-    expiration_date = models.DateTimeField(default=timezone.now)
+    token = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="توکن"
+    )
+    phone = models.CharField(
+        max_length=15,
+        unique=True,
+        validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="شماره تلفن معتبر نیست")],
+        verbose_name="شماره تلفن"
+    )
+    code = models.SmallIntegerField(
+        verbose_name="کد"
+    )
+    expiration_date = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="تاریخ انقضا"
+    )
 
     def __str__(self):
         return self.phone
@@ -100,16 +172,35 @@ class Otp(models.Model):
         now = timezone.now()
         return now <= self.expiration_date
 
+    class Meta:
+        verbose_name = "کد تایید"
+        verbose_name_plural = "کدهای تایید"
 
+#//////////////////////////////////
+# ContactUs Model
+#//////////////////////////////////
 class ContactUs(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='contactus', verbose_name="کاربر")
-    subject = models.CharField(max_length=50, verbose_name="موضوع")
-    message = models.TextField(verbose_name="پیام")
-    created_at = models.DateTimeField(auto_now_add=True,null=True,blank=True, verbose_name="تاریخ ایجاد")
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='contactus',
+        verbose_name="کاربر"
+    )
+    subject = models.CharField(
+        max_length=50,
+        verbose_name="موضوع"
+    )
+    message = models.TextField(
+        verbose_name="پیام"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        null=True,
+        blank=True,
+        verbose_name="تاریخ ایجاد"
+    )
 
     def __str__(self):
-        if self.user.email:
-            return f'Contact from {self.user.fullname} - {self.subject[:20]}'
         return f'Contact from {self.user.fullname} - {self.subject[:20]}'
 
     class Meta:

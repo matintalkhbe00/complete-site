@@ -39,6 +39,16 @@
             color: #f44336;
             margin-bottom: 1rem;
         }
+h2 {
+    color: #ffffcc; /* رنگ متن */
+    margin: 10px 0; /* فاصله‌ی بیرونی از بالا و پایین */
+    padding: 10px; /* فاصله‌ی داخلی */
+    border: 2px solid #9ca3af; /* حاشیه به ضخامت 2px و رنگ خاکستری */
+    border-radius: 5px; /* گوشه‌های گرد */
+    text-align: center; /* تراز کردن متن به مرکز (اختیاری) */
+    background-color: #2d3748; /* رنگ زمینه */
+}
+
     </style>
 {% endblock %}
 
@@ -47,13 +57,20 @@
         <div class="form-container">
             <h2>ویرایش پروفایل</h2>
 
+            <!-- فرم ویرایش اطلاعات پروفایل -->
+            <form method="POST" action="{% url 'account_app:edit_profile' %}">
+                {% csrf_token %}
+                {{ profile_form.as_p }}
+                <button type="submit">ذخیره تغییرات</button>
+            </form>
+
             <!-- نمایش پیام‌های خطا -->
             {% if profile_form.errors %}
                 <div class="error-message">
                     <ul>
                         {% for field in profile_form %}
                             {% for error in field.errors %}
-                                <li>{{ error }}</li>
+                                <li>{{ field.label }}: {{ error }}</li>  <!-- نمایش خطاهای هر فیلد به صورت جداگانه -->
                             {% endfor %}
                         {% endfor %}
                         {% for error in profile_form.non_field_errors %}
@@ -62,13 +79,6 @@
                     </ul>
                 </div>
             {% endif %}
-
-            <!-- فرم ویرایش اطلاعات پروفایل -->
-            <form method="POST" action="{% url 'account_app:edit_profile' %}">
-                {% csrf_token %}
-                {{ profile_form.as_p }}
-                <button type="submit">ذخیره تغییرات</button>
-            </form>
 
             <h2>تغییر رمز عبور</h2>
 
@@ -89,9 +99,8 @@
             {% endif %}
 
             <!-- فرم تغییر رمز عبور -->
-            <form method="POST" action="{% url 'account_app:password_change' %}">
+            <form method="GET" action="{% url 'account_app:send_code' %}">
                 {% csrf_token %}
-                {{ password_form.as_p }}
                 <button type="submit">تغییر رمز عبور</button>
             </form>
         </div>

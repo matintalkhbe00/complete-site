@@ -85,16 +85,20 @@
                         ثبت نام
                     </button>
                 </form>
-                <div class="flex items-center justify-between mt-4">
-{#                    <hr class="w-full border-gray-400">#}
-{#                    <span class="px-2 text-gray-400">یا</span>#}
-{#                    <hr class="w-full border-gray-400">#}
-{#                </div>#}
-{#                <button class="w-full px-4 py-2 text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">#}
-{#                    ورود با گوگل#}
-{#                </button>#}
-                <p class="text-sm text-center text-gray-400 mt-4">حساب کاربری دارید؟ <a
-                        href="{% url 'account_app:login' %}" class="text-blue-300 hover:underline">ورود کنید</a></p>
+                <div class=" items-center justify-between mt-4">
+                    {#                    <hr class="w-full border-gray-400">#}
+                    {#                    <span class="px-2 text-gray-400">یا</span>#}
+                    {#                    <hr class="w-full border-gray-400">#}
+                    {#                </div>#}
+                    {#                <button class="w-full px-4 py-2 text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">#}
+                    {#                    ورود با گوگل#}
+                    {#                </button>#}
+                    <p class="text-sm text-center text-gray-400 mt-4">حساب کاربری دارید؟ <a
+                            href="{% url 'account_app:login' %}" class="text-blue-300 hover:underline">ورود کنید</a></p>
+                    <p class="text-sm text-center text-gray-400 mt-4">در صورت ثبت نام در سایت شما به صورت پیش فرض <a
+                            href="{% url 'home_app:roles' %}" class="text-blue-300 hover:underline">قوانین</a> سایت را
+                        پذیرفته اید</p>
+                </div>
             </div>
         </div>
     </main>
